@@ -2,52 +2,52 @@
 	var _C = function() {
 		var _ins = this;
 		_ins.files = [{
-			source: '/resources/Abc.mkf',
+			source: './resources/Abc.mkf',
 			buffer_name: 'ABC_BUFFER'
 		}, {
-			source: '/resources/Ball.mkf',
+			source: './resources/Ball.mkf',
 			buffer_name: 'BALL_BUFFER'
 		}, {
-			source: '/resources/Data.mkf',
+			source: './resources/Data.mkf',
 			buffer_name: 'DATA_BUFFER'
 		}, {
-			source: '/resources/F.mkf',
+			source: './resources/F.mkf',
 			buffer_name: 'F_BUFFER'
 		}, {
-			source: '/resources/Fbp.mkf',
+			source: './resources/Fbp.mkf',
 			buffer_name: 'FBP_BUFFER'
 		}, {
-			source: '/resources/Fire.mkf',
+			source: './resources/Fire.mkf',
 			buffer_name: 'FIRE_BUFFER'
 		}, {
-			source: '/resources/Gop.mkf',
+			source: './resources/Gop.mkf',
 			buffer_name: 'GOP_BUFFER'
 		}, {
-			source: '/resources/M.msg',
+			source: './resources/M.msg',
 			buffer_name: 'MSG_BUFFER'
 		}, {
-			source: '/resources/Map.mkf',
+			source: './resources/Map.mkf',
 			buffer_name: 'MAP_BUFFER'
 		}, {
-			source: '/resources/Mgo.mkf',
+			source: './resources/Mgo.mkf',
 			buffer_name: 'MGO_BUFFER'
 		}, {
-			source: '/resources/MUS.MKF',
+			source: './resources/MUS.MKF',
 			buffer_name: 'MUS_BUFFER'
 		}, {
-			source: '/resources/Pat.mkf',
+			source: './resources/Pat.mkf',
 			buffer_name: 'PAT_BUFFER'
 		}, {
-			source: '/resources/Rgm.mkf',
+			source: './resources/Rgm.mkf',
 			buffer_name: 'RGM_BUFFER'
 		}, {
-			source: '/resources/Rng.mkf',
+			source: './resources/Rng.mkf',
 			buffer_name: 'RNG_BUFFER'
 		}, {
-			source: '/resources/Sss.mkf',
+			source: './resources/Sss.mkf',
 			buffer_name: 'SSS_BUFFER'
 		}, {
-			source: '/resources/Word.dat',
+			source: './resources/Word.dat',
 			buffer_name: 'WORD_BUFFER'
 		}];
 		_ins.buffers = {};
