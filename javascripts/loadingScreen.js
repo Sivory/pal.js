@@ -7,7 +7,7 @@
 		var width = canvas.width;
 		var height = canvas.height;
 		var r1 = 20;
-		var r2 = 2;
+		var r2 = opacity * 20;
 		context.fillStyle = '#fff';
 		context.fillRect(0, 0, canvas.width, canvas.height);
 		context.beginPath();
@@ -15,7 +15,7 @@
 		context.arc(width / 2, height / 2, r1, startR, endR);
 		context.arc(width / 2, height / 2, r1 - r2, endR, startR, true);
 		context.closePath();
-		context.fillStyle = 'rgba(0,0,0,' + opacity + ')';
+		context.fillStyle = 'rgba(90,90,90,' + opacity + ')';
 		context.fill();
 	}
 })();
