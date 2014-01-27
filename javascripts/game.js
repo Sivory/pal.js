@@ -28,6 +28,7 @@
 		var finish = function() {
 			loaded = true;
 		}
+		PAL_DrawLoadingScreen(_ins.canvas.canvas, 0, opacity);
 		var loadingTimer = window.setInterval(function() {
 			if (drawPercent < percent) {
 				PAL_DrawLoadingScreen(_ins.canvas.canvas, drawPercent, opacity);
