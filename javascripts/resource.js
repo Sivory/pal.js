@@ -1,4 +1,6 @@
 (function() {
+	var TOTAL_LENGTH = 24067722;
+
 	var _C = function() {
 		var _ins = this;
 		_ins.files = [{
@@ -59,20 +61,12 @@
 			e.target.PAL_fileData.total = e.total;
 			e.target.PAL_fileData.loaded = e.loaded;
 			e.target.PAL_fileData.status = 'loading';
-			var totalSum = 0;
+			var totalSum = TOTAL_LENGTH;
 			var loadedSum = 0;
 			for (var i = 0; i < _ins.files.length; i++) {
-				if (_ins.files[i].status == 'unload') {
-					totalSum = 0;
-					loadedSum = 0;
-					break;
-				}
-				totalSum += _ins.files[i].total;
 				loadedSum += _ins.files[i].loaded;
 			}
-			var percent = 0;
-			if (totalSum > 0)
-				percent = loadedSum / totalSum;
+			var percent = loadedSum / totalSum;
 			if (typeof tick == 'function')
 				tick({
 					percent: percent

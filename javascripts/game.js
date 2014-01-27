@@ -32,7 +32,7 @@
 		var loadingTimer = window.setInterval(function() {
 			if (drawPercent < percent) {
 				PAL_DrawLoadingScreen(_ins.canvas.canvas, drawPercent, opacity);
-				drawPercent += 0.02;
+				drawPercent += 0.01;
 			} else if (loaded) {
 				if (opacity < 0) {
 					callback();
