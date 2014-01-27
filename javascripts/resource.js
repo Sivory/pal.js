@@ -32,7 +32,7 @@
 			source: './resources/mgo.mkf',
 			buffer_name: 'MGO_BUFFER'
 		}, {
-			source: './resources/mus.MKF',
+			source: './resources/mus.mkf',
 			buffer_name: 'MUS_BUFFER'
 		}, {
 			source: './resources/pat.mkf',
