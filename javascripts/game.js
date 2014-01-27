@@ -43,7 +43,8 @@
 				opacity -= 0.05;
 			}
 		}, 20);
-		var error = function() {
+		var error = function(e) {
+			console.log(e);
 			alert('数据加载错误');
 		}
 		_ins.resource.load(tick, finish, error);
