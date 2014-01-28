@@ -68,12 +68,12 @@
 				var r = paletteView[colorIndex * 3];
 				var g = paletteView[colorIndex * 3 + 1];
 				var b = paletteView[colorIndex * 3 + 2];
-				for (var ii = 0; ii < 3; ii++) {
-					for (var jj = 0; jj < 3; jj++) {
-						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4] = r;
-						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4 + 1] = g;
-						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4 + 2] = b;
-						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4 + 3] = 255;
+				for (var ii = 0; ii < DRAW_PIXAL_HEIGHT; ii++) {
+					for (var jj = 0; jj < DRAW_PIXAL_WIDTH; jj++) {
+						pixals[((i * DRAW_PIXAL_HEIGHT + ii) * REAL_WIDTH + j * DRAW_PIXAL_WIDTH + jj) * 4] = r;
+						pixals[((i * DRAW_PIXAL_HEIGHT + ii) * REAL_WIDTH + j * DRAW_PIXAL_WIDTH + jj) * 4 + 1] = g;
+						pixals[((i * DRAW_PIXAL_HEIGHT + ii) * REAL_WIDTH + j * DRAW_PIXAL_WIDTH + jj) * 4 + 2] = b;
+						pixals[((i * DRAW_PIXAL_HEIGHT + ii) * REAL_WIDTH + j * DRAW_PIXAL_WIDTH + jj) * 4 + 3] = 255;
 					}
 				}
 			}

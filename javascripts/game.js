@@ -40,12 +40,12 @@
 				} else {
 					PAL_DrawLoadingScreen(_ins.canvas.canvas, 1, opacity);
 				}
-				opacity -= 0.05;
+				opacity -= 0.02;
 			}
 		}, 20);
 		var error = function(e) {
-			console.log(e);
-			alert('数据加载错误');
+			window.clearInterval(loadingTimer);
+			PAL_DrawErrorScreen(_ins.canvas.canvas, '资源[' + e.target.PAL_fileData.source + ']读取失败');
 		}
 		_ins.resource.load(tick, finish, error);
 	}
@@ -95,6 +95,7 @@
 		var entry = _ins.ui.openingMenu();
 	}
 
+	// 大宇LOGO动画
 	_C.prototype.TrademarkScreen = function(callback) {
 		var _ins = this;
 		_ins.ui.setPalette(3, false);
@@ -105,7 +106,6 @@
 			}, 1000);
 		});
 	}
-
 
 	window.PAL_Game = _C;
 })();

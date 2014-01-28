@@ -282,7 +282,6 @@
 			if ((new Date()).getTime() >= iTime) {
 				iTime = (new Date()).getTime() + iDelay;
 				if (_ins.RNGBlitToCanvas(iNumRNG, iStartFrame, _ins.game.canvas.buffer, fBuffer) == -1) {
-					console.log(waitCount, totalCount);
 					return;
 				}
 
@@ -308,7 +307,6 @@
 			} else if (iStartFrame <= iEndFrame) {
 				webkitRequestAnimationFrame(tick);
 			} else {
-				console.log(waitCount, totalCount);
 				callback();
 			}
 		};
