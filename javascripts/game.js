@@ -40,29 +40,38 @@
 				} else {
 					PAL_DrawLoadingScreen(_ins.canvas.canvas, 1, opacity);
 				}
-				opacity -= 0.05;
+				opacity -= 0.02;
 			}
 		}, 20);
 		var error = function(e) {
-			console.log(e);
-			alert('数据加载错误');
+			window.clearInterval(loadingTimer);
+			PAL_DrawErrorScreen(_ins.canvas.canvas, '资源[' + e.target.PAL_fileData.source + ']读取失败');
 		}
 		_ins.resource.load(tick, finish, error);
 	}
 
 	_C.prototype.init = function() {
 		var _ins = this;
+		_ins.initGlobals();
 		_ins.initEvent();
 		_ins.initUI();
 		_ins.initResource(function() {
-			_ins.initGame();
+			_ins.TrademarkScreen(function() {
+				_ins.initGame();
+			});
 		});
+	}
+
+	_C.prototype.initGlobals = function() {
+		var _ins = this;
+		_ins.globals = {};
 	}
 
 	_C.prototype.initUI = function() {
 		var _ins = this;
 		_ins.canvas = new PAL_Canvas(_ins);
 		_ins.ui = new PAL_UI(_ins);
+		_ins.rng = new PAL_Rng(_ins);
 	}
 
 	_C.prototype.initEvent = function() {
@@ -84,6 +93,18 @@
 	_C.prototype.initGame = function() {
 		var _ins = this;
 		var entry = _ins.ui.openingMenu();
+	}
+
+	// 大宇LOGO动画
+	_C.prototype.TrademarkScreen = function(callback) {
+		var _ins = this;
+		_ins.ui.setPalette(3, false);
+		_ins.rng.RNGPlay(6, 0, 1000, 25, function() {
+			setTimeout(function() {
+				// PAL_FadeOut(1);
+				callback();
+			}, 1000);
+		});
 	}
 
 	window.PAL_Game = _C;

@@ -95,5 +95,12 @@
 		return len;
 	}
 
+	util.__defineGetter__('requestAnimationFrame', function() {
+		if ( !! window.requestAnimationFrame) return window.requestAnimationFrame;
+		if ( !! window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame;
+		if ( !! window.mozRequestAnimationFrame) return window.mozRequestAnimationFrame;
+		if ( !! window.msRequestAnimationFrame) return window.msRequestAnimationFrame;
+	});
+
 	window.PAL_Util = util;
 })();
