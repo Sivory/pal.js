@@ -38,6 +38,12 @@
 		return palette;
 	}
 
+	_C.prototype.setPalette = function(iPaletteNum, fNight) {
+		var _ins = this;
+		var paletteBuffer = _ins.getPalette(iPaletteNum, fNight);
+		_ins.game.canvas.setPalette(paletteBuffer);
+	}
+
 	_C.prototype.drawOpeningMenuBackground = function() {
 		var _ins = this;
 		var buf = new ArrayBuffer(320 * 200);

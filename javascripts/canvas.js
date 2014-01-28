@@ -15,10 +15,11 @@
 		canvas.width = REAL_WIDTH;
 		canvas.height = REAL_HEIGHT;
 		var context = canvas.getContext('2d');
-		//绘图缓存
-		var buffer = new ArrayBuffer(DRAW_WIDTH * DRAW_HEIGHT);
 		//调色板
 		var palette = new ArrayBuffer(COLOR_NUM * 3);
+		//绘图缓存
+		var buffer = new ArrayBuffer(DRAW_WIDTH * DRAW_HEIGHT);
+		buffer.pitch = DRAW_WIDTH;
 
 		_ins.__defineGetter__('canvas', function() {
 			return canvas;
@@ -59,18 +60,25 @@
 		var _ins = this;
 		var bufferView = new Uint8Array(_ins.buffer);
 		var paletteView = new Uint8Array(_ins.palette);
-		//清空画布
-		_ins.canvas.width = _ins.canvas.width;
+		var imageData = _ins.context.getImageData(0, 0, REAL_WIDTH, REAL_HEIGHT);
+		var pixals = imageData.data;
 		for (var i = 0; i < DRAW_HEIGHT; i++) {
 			for (var j = 0; j < DRAW_WIDTH; j++) {
 				var colorIndex = bufferView[i * DRAW_WIDTH + j];
 				var r = paletteView[colorIndex * 3];
 				var g = paletteView[colorIndex * 3 + 1];
 				var b = paletteView[colorIndex * 3 + 2];
-				_ins.context.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-				_ins.context.fillRect(j * DRAW_PIXAL_WIDTH, i * DRAW_PIXAL_HEIGHT, DRAW_PIXAL_WIDTH, DRAW_PIXAL_HEIGHT);
+				for (var ii = 0; ii < 3; ii++) {
+					for (var jj = 0; jj < 3; jj++) {
+						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4] = r;
+						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4 + 1] = g;
+						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4 + 2] = b;
+						pixals[((i * 3 + ii) * REAL_WIDTH + j * 3 + jj) * 4 + 3] = 255;
+					}
+				}
 			}
 		}
+		_ins.context.putImageData(imageData, 0, 0);
 	}
 
 	window.PAL_Canvas = _C;
