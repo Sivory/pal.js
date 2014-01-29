@@ -32,7 +32,7 @@
 		var loadingTimer = window.setInterval(function() {
 			if (drawPercent < percent) {
 				PAL_DrawLoadingScreen(_ins.canvas.canvas, drawPercent, opacity);
-				drawPercent += 0.01;
+				drawPercent += 0.02;
 			} else if (loaded) {
 				if (opacity < 0) {
 					callback();
@@ -55,6 +55,7 @@
 		_ins.initGlobals();
 		_ins.initEvent();
 		_ins.initUI();
+		_ins.sound = new PAL_Sound(_ins);
 		_ins.initResource(function() {
 			_ins.TrademarkScreen(function() {
 				_ins.initGame();
@@ -101,8 +102,9 @@
 		_ins.ui.setPalette(3, false);
 		_ins.rng.RNGPlay(6, 0, 1000, 25, function() {
 			setTimeout(function() {
-				// PAL_FadeOut(1);
-				callback();
+				_ins.ui.fadeOut(1, function() {
+					callback();
+				});
 			}, 1000);
 		});
 	}

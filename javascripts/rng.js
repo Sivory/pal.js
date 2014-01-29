@@ -277,11 +277,12 @@
 		var iTime = (new Date()).getTime();
 		var waitCount = 0;
 		var totalCount = 0;
-		var tick = function() {
+		(function tick() {
 			totalCount++;
 			if ((new Date()).getTime() >= iTime) {
 				iTime = (new Date()).getTime() + iDelay;
 				if (_ins.RNGBlitToCanvas(iNumRNG, iStartFrame, _ins.game.canvas.buffer, fBuffer) == -1) {
+					callback();
 					return;
 				}
 
@@ -305,12 +306,11 @@
 						callback();
 				});
 			} else if (iStartFrame <= iEndFrame) {
-				webkitRequestAnimationFrame(tick);
+				PAL_Util.requestAnimationFrame(tick);
 			} else {
 				callback();
 			}
-		};
-		tick();
+		})();
 	}
 
 	window.PAL_Rng = _C;
