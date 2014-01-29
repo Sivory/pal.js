@@ -95,12 +95,13 @@
 		return len;
 	}
 
-	util.__defineGetter__('requestAnimationFrame', function() {
-		if ( !! window.requestAnimationFrame) return window.requestAnimationFrame;
-		if ( !! window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame;
-		if ( !! window.mozRequestAnimationFrame) return window.mozRequestAnimationFrame;
-		if ( !! window.msRequestAnimationFrame) return window.msRequestAnimationFrame;
-	});
+	util.requestAnimationFrame = function(tick) {
+		if ( !! window.requestAnimationFrame) window.requestAnimationFrame(tick);
+		else if ( !! window.webkitRequestAnimationFrame) window.webkitRequestAnimationFrame(tick);
+		else if ( !! window.mozRequestAnimationFrame) window.mozRequestAnimationFrame(tick);
+		else if ( !! window.msRequestAnimationFrame) window.msRequestAnimationFrame(tick);
+		else setTimeout(tick, 20);
+	};
 
 	window.PAL_Util = util;
 })();

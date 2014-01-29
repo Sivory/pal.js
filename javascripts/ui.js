@@ -44,6 +44,47 @@
 		_ins.game.canvas.setPalette(paletteBuffer);
 	}
 
+	_C.prototype.fadeOut = function(iDelay, callback) {
+		var _ins = this;
+		//
+		// Get the original palette...
+		//
+		var palette = new Uint8Array(_ins.game.canvas.palette);
+		var paletteTemp = [];
+		for (var i = 0; i < palette.length; i++) {
+			paletteTemp[i] = palette[i];
+		}
+
+		//
+		// Start fading out...
+		//
+		var time = Date.now() + iDelay * 10 * 60;
+
+		(function tick() {
+			//
+			// Set the current palette...
+			//
+			var j = Math.floor((time - Date.now()) / iDelay / 10);
+			if (j < 0) {
+				for (var i = 0; i < palette.length; i++) {
+					palette[i] = 0;
+				}
+				_ins.game.canvas.flush();
+				callback();
+			} else {
+				for (i = 0; i < 256; i++) {
+					palette[i + 1] = Math.floor(paletteTemp[i + 1] * j) >> 6;
+					palette[i + 2] = Math.floor(paletteTemp[i + 2] * j) >> 6;
+					palette[i + 3] = Math.floor(paletteTemp[i + 3] * j) >> 6;
+				}
+				_ins.game.canvas.flush();
+				PAL_Util.requestAnimationFrame(tick);
+			}
+		})();
+
+	}
+
+
 	_C.prototype.drawOpeningMenuBackground = function() {
 		var _ins = this;
 		var buf = new ArrayBuffer(320 * 200);
