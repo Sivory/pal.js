@@ -1,5 +1,5 @@
 (function() {
-	var TOTAL_LENGTH = 41625018; // 24067722
+	var TOTAL_LENGTH = 40545290;
 
 	var _C = function() {
 		var _ins = this;
