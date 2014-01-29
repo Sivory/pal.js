@@ -282,6 +282,7 @@
 			if ((new Date()).getTime() >= iTime) {
 				iTime = (new Date()).getTime() + iDelay;
 				if (_ins.RNGBlitToCanvas(iNumRNG, iStartFrame, _ins.game.canvas.buffer, fBuffer) == -1) {
+					callback();
 					return;
 				}
 

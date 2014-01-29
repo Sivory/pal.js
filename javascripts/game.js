@@ -55,7 +55,9 @@
 		_ins.initGlobals();
 		_ins.initEvent();
 		_ins.initUI();
+		_ins.sound = new PAL_Sound(_ins);
 		_ins.initResource(function() {
+			_ins.sound.playMusic(5, true, 0);
 			_ins.TrademarkScreen(function() {
 				_ins.initGame();
 			});
