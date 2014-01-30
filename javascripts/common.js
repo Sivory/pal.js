@@ -103,5 +103,10 @@
 		else setTimeout(tick, 20);
 	};
 
+	util.RandomLong = function(start, end) {
+		if (end <= start) return start;
+		return Math.round(Math.random() * (end - start)) + start;
+	}
+
 	window.PAL_Util = util;
 })();
