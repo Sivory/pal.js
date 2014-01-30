@@ -9,39 +9,15 @@
 	_C.prototype.openingMenu = function() {
 		var _ins = this;
 		_ins.drawOpeningMenuBackground();
-		var palette = _ins.getPalette(0, false);
-		_ins.game.canvas.setPalette(palette);
+		_ins.setPalette(0, false);
 		_ins.game.canvas.flush();
 	};
 
-	_C.prototype.getPalette = function(iPaletteNum, fNight) {
-		var _ins = this;
-		var fBuffer = _ins.game.resource.buffers.PAT_BUFFER;
-		var buf = new ArrayBuffer(1536);
-		var bufDataView = new DataView(buf);
-		var len = PAL_Util.MKFReadChunk(bufDataView, 1536, iPaletteNum, fBuffer);
-
-		if (len < 0) {
-			return null;
-		} else if (len <= 256 * 3) {
-			fNight = false;
-		}
-
-		var palette = new ArrayBuffer(256 * 3);
-		var paletteArray = new Uint8Array(palette);
-		for (var i = 0; i < 256; i++) {
-			paletteArray[i * 3] = bufDataView.getUint8((fNight ? 256 * 3 : 0) + i * 3) << 2;
-			paletteArray[i * 3 + 1] = bufDataView.getUint8((fNight ? 256 * 3 : 0) + i * 3 + 1) << 2;
-			paletteArray[i * 3 + 2] = bufDataView.getUint8((fNight ? 256 * 3 : 0) + i * 3 + 2) << 2;
-		}
-
-		return palette;
-	}
-
 	_C.prototype.setPalette = function(iPaletteNum, fNight) {
 		var _ins = this;
-		var paletteBuffer = _ins.getPalette(iPaletteNum, fNight);
-		_ins.game.canvas.setPalette(paletteBuffer);
+		var palette = new PAL_Palette();
+		palette.loadFromChunk(iPaletteNum, fNight, _ins.game.resource.buffers.PAT_BUFFER);
+		_ins.game.canvas.setPalette(palette);
 	}
 
 	_C.prototype.fadeOut = function(iDelay, callback) {
@@ -49,11 +25,8 @@
 		//
 		// Get the original palette...
 		//
-		var palette = new Uint8Array(_ins.game.canvas.palette);
-		var paletteTemp = [];
-		for (var i = 0; i < palette.length; i++) {
-			paletteTemp[i] = palette[i];
-		}
+		var palette = _ins.game.canvas.palette;
+		var paletteTemp = new PAL_Palette(palette);
 
 		//
 		// Start fading out...
@@ -67,15 +40,24 @@
 			var j = Math.floor((time - Date.now()) / iDelay / 10);
 			if (j < 0) {
 				for (var i = 0; i < palette.length; i++) {
-					palette[i] = 0;
+					var color = {
+						r: 0,
+						g: 0,
+						b: 0
+					};
+					palette.setColor(i, color);
 				}
 				_ins.game.canvas.flush();
 				callback();
 			} else {
-				for (i = 0; i < 256; i++) {
-					palette[i + 1] = Math.floor(paletteTemp[i + 1] * j) >> 6;
-					palette[i + 2] = Math.floor(paletteTemp[i + 2] * j) >> 6;
-					palette[i + 3] = Math.floor(paletteTemp[i + 3] * j) >> 6;
+				for (var i = 0; i < 256; i++) {
+					var _color = paletteTemp.getColor(i);
+					var color = {
+						r: Math.floor(_color.r * j) >> 6,
+						g: Math.floor(_color.g * j) >> 6,
+						b: Math.floor(_color.b * j) >> 6
+					};
+					palette.setColor(i, color);
 				}
 				_ins.game.canvas.flush();
 				PAL_Util.requestAnimationFrame(tick);
@@ -87,11 +69,9 @@
 
 	_C.prototype.drawOpeningMenuBackground = function() {
 		var _ins = this;
-		var buf = new ArrayBuffer(320 * 200);
-		var bufDataView = new DataView(buf);
-
-		var res = PAL_Util.MKFDecompressChunk(bufDataView, 320 * 200, MAINMENU_BACKGROUND_FBPNUM, _ins.game.resource.buffers.FBP_BUFFER);
-		_ins.game.canvas.FBPBlitToScreen(buf);
+		var fbp = new PAL_Fbp(320, 200);
+		fbp.loadFromChunk(MAINMENU_BACKGROUND_FBPNUM, _ins.game.resource.buffers.FBP_BUFFER);
+		fbp.blitTo(_ins.game.canvas.screen);
 
 	}
 

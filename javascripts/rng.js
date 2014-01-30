@@ -65,18 +65,17 @@
 		return iChunkLen;
 	}
 
-	_C.prototype.RNGBlitToCanvas = function(iNumRNG, iNumFrame, canvasBuffer, fBuffer) {
+	_C.prototype.RNGBlitToCanvas = function(iNumRNG, iNumFrame, surface, fBuffer) {
 		var ptr = 0;
 		var dst_ptr = 0;
 		var data = 0;
 		var wdata = 0;
 		var x, y, i, n;
-		var canvasBufferDataView = new DataView(canvasBuffer);
 
 		//
 		// Check for invalid parameters.
 		//
-		if (canvasBuffer == null || iNumRNG < 0 || iNumFrame < 0) {
+		if (surface == null || iNumRNG < 0 || iNumFrame < 0) {
 			return -1;
 		}
 
@@ -127,56 +126,56 @@
 				case 0x0a:
 					x = dst_ptr % 320;
 					y = Math.floor(dst_ptr / 320);
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					if (++x >= 320) {
 						x = 0;
 						++y;
 					}
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					dst_ptr += 2;
 
 				case 0x09:
 					x = dst_ptr % 320;
 					y = Math.floor(dst_ptr / 320);
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					if (++x >= 320) {
 						x = 0;
 						++y;
 					}
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					dst_ptr += 2;
 
 				case 0x08:
 					x = dst_ptr % 320;
 					y = Math.floor(dst_ptr / 320);
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					if (++x >= 320) {
 						x = 0;
 						++y;
 					}
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					dst_ptr += 2;
 
 				case 0x07:
 					x = dst_ptr % 320;
 					y = Math.floor(dst_ptr / 320);
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					if (++x >= 320) {
 						x = 0;
 						++y;
 					}
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					dst_ptr += 2;
 
 				case 0x06:
 					x = dst_ptr % 320;
 					y = Math.floor(dst_ptr / 320);
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					if (++x >= 320) {
 						x = 0;
 						++y;
 					}
-					canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+					surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 					dst_ptr += 2;
 					break;
 
@@ -185,12 +184,12 @@
 					for (i = 0; i <= data; i++) {
 						x = dst_ptr % 320;
 						y = Math.floor(dst_ptr / 320);
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 						if (++x >= 320) {
 							x = 0;
 							++y;
 						}
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 						dst_ptr += 2;
 					}
 					break;
@@ -201,12 +200,12 @@
 					for (i = 0; i <= wdata; i++) {
 						x = dst_ptr % 320;
 						y = Math.floor(dst_ptr / 320);
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 						if (++x >= 320) {
 							x = 0;
 							++y;
 						}
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr++));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr++));
 						dst_ptr += 2;
 					}
 					break;
@@ -218,12 +217,12 @@
 					for (i = 0; i < data - (0x0d - 2); i++) {
 						x = dst_ptr % 320;
 						y = Math.floor(dst_ptr / 320);
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr));
 						if ((++x) >= 320) {
 							x = 0;
 							++y;
 						}
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr + 1));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr + 1));
 						dst_ptr += 2;
 					}
 					ptr += 2;
@@ -234,12 +233,12 @@
 					for (i = 0; i <= data; i++) {
 						x = dst_ptr % 320;
 						y = Math.floor(dst_ptr / 320);
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr));
 						if ((++x) >= 320) {
 							x = 0;
 							++y;
 						}
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr + 1));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr + 1));
 						dst_ptr += 2;
 					}
 					ptr += 2;
@@ -251,12 +250,12 @@
 					for (i = 0; i < n; i++) {
 						x = dst_ptr % 320;
 						y = Math.floor(dst_ptr / 320);
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr));
 						if ((++x) >= 320) {
 							x = 0;
 							++y;
 						}
-						canvasBufferDataView.setUint8(y * canvasBuffer.pitch + x, rngDataView.getUint8(ptr + 1));
+						surface.setPixal(x, y, rngDataView.getUint8(ptr + 1));
 						dst_ptr += 2;
 					}
 					ptr += 2;
@@ -281,7 +280,7 @@
 			totalCount++;
 			if ((new Date()).getTime() >= iTime) {
 				iTime = (new Date()).getTime() + iDelay;
-				if (_ins.RNGBlitToCanvas(iNumRNG, iStartFrame, _ins.game.canvas.buffer, fBuffer) == -1) {
+				if (_ins.RNGBlitToCanvas(iNumRNG, iStartFrame, _ins.game.canvas.screen, fBuffer) == -1) {
 					callback();
 					return;
 				}
@@ -313,5 +312,5 @@
 		})();
 	}
 
-	window.PAL_Rng = _C;
+	window.PAL_RngPlayer = _C;
 })();
