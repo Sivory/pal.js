@@ -59,8 +59,8 @@
 	_C.prototype.init = function() {
 		var _ins = this;
 		_ins.initGlobals();
-		_ins.initEvent();
 		_ins.initUI();
+		_ins.initInput();
 		_ins.sound = new PAL_Sound(_ins);
 		_ins.initResource(function() {
 			_ins.TrademarkScreen(function() {
@@ -69,6 +69,18 @@
 				});
 			});
 		});
+	}
+
+	_C.prototype.initInput = function() {
+		var _ins = this;
+		_ins.input = new PAL_Input(_ins);
+		window.addEventListener('keydown', function(e) {
+			_ins.input.keyDownHandler(e);
+		}, false);
+
+		window.addEventListener('keyup', function(e) {
+			_ins.input.keyUpHandler(e);
+		}, false);
 	}
 
 	_C.prototype.initGlobals = function() {
@@ -83,25 +95,9 @@
 		_ins.rng = new PAL_RngPlayer(_ins);
 	}
 
-	_C.prototype.initEvent = function() {
-		var _ins = this;
-		window.addEventListener('keypress', function(e) {
-			if (typeof _ins.onKeyPress == 'function')
-				_ins.onKeyPress(e);
-		}, false);
-		window.addEventListener('keydown', function(e) {
-			if (typeof _ins.onKeyDown == 'function')
-				_ins.onKeyDown(e);
-		}, false);
-		window.addEventListener('keydown', function(e) {
-			if (typeof _ins.onKeyDown == 'function')
-				_ins.onKeyDown(e);
-		}, false);
-	}
-
 	_C.prototype.initGame = function() {
 		var _ins = this;
-		var entry = _ins.ui.openingMenu();
+		_ins.ui.openingMenu();
 	}
 
 	// 大宇LOGO动画
@@ -118,6 +114,8 @@
 	}
 
 	//开场动画
+	//山水背景分上下两部分拼接
+	//仙鹤9只 位置与姿态随机生成
 	_C.prototype.splashScreen = function(callback) {
 		var _ins = this;
 		var palette = new PAL_Palette();
@@ -167,9 +165,12 @@
 		//
 		_ins.sound.playMusic(NUM_RIX_TITLE, true, 2);
 
+		_ins.input.clearKeyState();
+
 		var dwBeginTime = Date.now();
 		var dwTime = 0;
 		(function tick() {
+			var stopLoop = false;
 			if (Date.now() - dwBeginTime >= dwTime + 85) {
 				dwTime = Date.now() - dwBeginTime;
 				//
@@ -254,6 +255,59 @@
 				});
 
 				_ins.canvas.flush();
+
+				if (_ins.input.keyPress & (PAL_Input.kKeyMenu | PAL_Input.kKeySearch)) {
+					//
+					// User has pressed a key...
+					//
+					bitmapTitle.height = iTitleHeight;
+
+					bitmapTitle.blitTo(_ins.canvas.screen, {
+						x: 255,
+						y: 10
+					});
+
+					_ins.canvas.flush();
+
+					if (dwTime < 15000) {
+						//
+						// If the picture has not completed fading in, complete the rest
+						//
+						var dwTimeTemp = dwTime;
+						(function tick() {
+							dwTime = Date.now() - dwBeginTime;
+							dwTime = dwTimeTemp + (dwTime - dwTimeTemp) * 30;
+							if (dwTime >= 15000) {
+								window.setTimeout(function() {
+									_ins.sound.playMusic(0, false, 1);
+									_ins.ui.fadeOut(1, callback);
+								}, 500);
+								return;
+							}
+							for (var i = 0; i < 256; i++) {
+								var color = palette.getColor(i);
+								color.r = Math.floor(color.r * (dwTime / 15000));
+								color.g = Math.floor(color.g * (dwTime / 15000));
+								color.b = Math.floor(color.b * (dwTime / 15000));
+								rgCurrentPalette.setColor(i, color);
+							}
+							_ins.canvas.setPalette(rgCurrentPalette);
+							_ins.canvas.flush();
+
+							PAL_Util.requestAnimationFrame(tick);
+						})();
+					} else {
+						window.setTimeout(function() {
+							_ins.sound.playMusic(0, false, 1);
+							_ins.ui.fadeOut(1, callback);
+						}, 500);
+					}
+
+					//
+					// Quit the splash screen
+					//
+					return;
+				}
 			}
 			PAL_Util.requestAnimationFrame(tick);
 		})();
