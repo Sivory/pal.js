@@ -71,8 +71,11 @@
 
 	_C.prototype.keyDownHandler = function(e) {
 		var _ins = this;
+
+		// 屏蔽掉键盘按住不动所产生的多余事件
 		if (_ins.keyFlag[e.keyCode]) return;
 		_ins.keyFlag[e.keyCode] = true;
+		
 		switch (e.keyCode) {
 
 			case PALK_UP:

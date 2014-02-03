@@ -279,6 +279,7 @@
 				}, color);
 				textPointer += 2;
 				rect.x += 16;
+				urect.w += 16;
 			} else {
 				//
 				// ASCII character
@@ -300,14 +301,15 @@
 				}, color);
 				lpszText++;
 				rect.x += 8;
+				urect.w += 8;
 			}
 		}
 
 		//
 		// Update the screen area
 		//
-		if (update) {
-			_ins.game.canvas.flush();
+		if (update && urect.w > 0) {
+			_ins.game.canvas.flush(urect);
 		}
 	}
 
@@ -332,7 +334,6 @@
 		//
 		PAL_Util.trim(data);
 
-		// why?
 		if ((PAL_Util.strlen(data) & 1) != 0 && data.getUint8(PAL_Util.strlen(data) - 1) == 0x31) {
 			data.setUint8(PAL_Util.strlen(data) - 1, 0);
 		}

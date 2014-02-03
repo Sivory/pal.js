@@ -37,9 +37,16 @@
 		return frame;
 	}
 
-	_C.prototype.loadFromChunk = function(index, fBuffer) {
+	_C.prototype.loadFromChunk = function(index, fBuffer, compressed) {
 		var _ins = this;
-		PAL_Util.MKFDecompressChunk(_ins.data, _ins.size, index, fBuffer);
+		//默认执行解压操作
+		if (compressed == null)
+			compressed = true;
+		if (compressed) {
+			PAL_Util.MKFDecompressChunk(_ins.data, _ins.size, index, fBuffer);
+		} else {
+			PAL_Util.MKFReadChunk(_ins.data, _ins.size, index, fBuffer);
+		}
 	}
 
 	_C.prototype.__defineGetter__('frameNumber', function() {

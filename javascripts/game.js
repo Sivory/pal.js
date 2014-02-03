@@ -7,18 +7,24 @@
 
 	var _C = function(config) {
 		var containerElement = document.getElementById(config.container);
-		containerElement.style.width = config.width + 'px';
-		containerElement.style.height = config.height + 'px';
-		containerElement.style.background = "#000";
 		this.container = containerElement;
-		this.width = config.width;
-		this.height = config.height;
-		this.volume = config.volume == null ? 1 : config.volume;
 	}
 
 	_C.prototype.start = function() {
 		var _ins = this;
-		_ins.init();
+		_ins.initGlobals();
+		_ins.initInput();
+		_ins.sound = new PAL_Sound(_ins);
+		_ins.canvas = new PAL_Canvas(_ins);
+		_ins.initResource(function() {
+			_ins.initUI();
+			_ins.writer = new PAL_Writer(_ins);
+			_ins.TrademarkScreen(function() {
+				_ins.splashScreen(function() {
+					_ins.initGame();
+				});
+			});
+		});
 	}
 
 	_C.prototype.initResource = function(callback) {
@@ -56,22 +62,6 @@
 		_ins.resource.load(tick, finish, error);
 	}
 
-	_C.prototype.init = function() {
-		var _ins = this;
-		_ins.initGlobals();
-		_ins.initUI();
-		_ins.initInput();
-		_ins.sound = new PAL_Sound(_ins);
-		_ins.initResource(function() {
-			_ins.writer = new PAL_Writer(_ins);
-			_ins.TrademarkScreen(function() {
-				_ins.splashScreen(function() {
-					_ins.initGame();
-				});
-			});
-		});
-	}
-
 	_C.prototype.initInput = function() {
 		var _ins = this;
 		_ins.input = new PAL_Input(_ins);
@@ -91,14 +81,15 @@
 
 	_C.prototype.initUI = function() {
 		var _ins = this;
-		_ins.canvas = new PAL_Canvas(_ins);
 		_ins.ui = new PAL_UI(_ins);
 		_ins.rng = new PAL_RngPlayer(_ins);
 	}
 
 	_C.prototype.initGame = function() {
 		var _ins = this;
-		_ins.ui.openingMenu();
+		_ins.ui.openingMenu(function(entry) {
+			console.log(entry);
+		});
 	}
 
 	// 大宇LOGO动画

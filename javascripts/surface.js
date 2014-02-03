@@ -39,6 +39,20 @@
 
 	_C.prototype.blitTo = function(targetSurface, srcrect, desrect) {
 		var _ins = this;
+		if (srcrect == null) {
+			srcrect = {
+				x: 0,
+				y: 0,
+				h: desrect.h,
+				w: desrect.w
+			};
+		}
+		if (desrect == null) {
+			desrect = {
+				x: 0,
+				y: 0
+			};
+		}
 		for (var i = 0; i < srcrect.h; i++) {
 			for (var j = 0; j < srcrect.w; j++) {
 				var pixal = _ins.getPixal(j + srcrect.x, i + srcrect.y);
