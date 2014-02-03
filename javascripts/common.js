@@ -108,5 +108,37 @@
 		return Math.round(Math.random() * (end - start)) + start;
 	}
 
+	util.trim = function(data) {
+		var pos = 0,
+			dest = 0;
+		// 前置空格移除
+		while (data.getUint8(pos) <= 0x20 && data.getUint8(pos) > 0) {
+			pos++;
+		}
+		while (data.getUint8(pos) > 0) {
+			data.setUint8(dest++, data.getUint8(pos++));
+		}
+		data.setUint8(dest--, 0);
+		// 后置空格移除
+		while (dest >= 0 && data.getUint8(dest) <= 0x20 && data.getUint8(dest) > 0) {
+			data.setUint8(dest--, 0);
+		}
+	}
+
+	// 待完善：低效代码
+	util.strlen = function(data) {
+		var length = 0;
+		while (data.getUint8(length) > 0) {
+			length++;
+		}
+		return length;
+	}
+
+	util.memcpy = function(target, source, length) {
+		for (var i = 0; i < length; i++) {
+			target.setUint8(i, source.getUint8(i));
+		}
+	}
+
 	window.PAL_Util = util;
 })();

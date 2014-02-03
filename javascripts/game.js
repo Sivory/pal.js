@@ -63,6 +63,7 @@
 		_ins.initInput();
 		_ins.sound = new PAL_Sound(_ins);
 		_ins.initResource(function() {
+			_ins.writer = new PAL_Writer(_ins);
 			_ins.TrademarkScreen(function() {
 				_ins.splashScreen(function() {
 					_ins.initGame();

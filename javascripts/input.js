@@ -43,6 +43,7 @@
 		_ins.keyPress = 0x0;
 		_ins.dir = PAL_Input.kDirUnknown;
 		_ins.prevdir = PAL_Input.kDirUnknown;
+		_ins.keyFlag = [];
 	}
 
 	_C.kKeyMenu = (1 << 0);
@@ -63,13 +64,15 @@
 	_C.kKeyForce = (1 << 15);
 
 	_C.kDirUnknown = 0;
-	_C.kDirNorth = (1 << 0);
-	_C.kDirEast = (1 << 1);
-	_C.kDirSouth = (1 << 2);
-	_C.kDirWest = (1 << 3);
+	_C.kDirNorth = 1;
+	_C.kDirEast = 2;
+	_C.kDirSouth = 3;
+	_C.kDirWest = 4;
 
 	_C.prototype.keyDownHandler = function(e) {
 		var _ins = this;
+		if (_ins.keyFlag[e.keyCode]) return;
+		_ins.keyFlag[e.keyCode] = true;
 		switch (e.keyCode) {
 
 			case PALK_UP:
@@ -161,6 +164,7 @@
 
 	_C.prototype.keyUpHandler = function(e) {
 		var _ins = this;
+		_ins.keyFlag[e.keyCode] = false;
 		switch (e.keyCode) {
 			case PALK_UP:
 			case PALK_KP8:

@@ -1,5 +1,5 @@
 (function() {
-	var TOTAL_LENGTH = 40545290;
+	var TOTAL_LENGTH = 42298730;
 
 	var _C = function() {
 		var _ins = this;
@@ -34,9 +34,6 @@
 			source: './resources/mgo.mkf',
 			buffer_name: 'MGO_BUFFER'
 		}, {
-			source: './resources/mus.mkf',
-			buffer_name: 'MUS_BUFFER'
-		}, {
 			source: './resources/pat.mkf',
 			buffer_name: 'PAT_BUFFER'
 		}, {
@@ -49,8 +46,17 @@
 			source: './resources/sss.mkf',
 			buffer_name: 'SSS_BUFFER'
 		}, {
+			source: './resources/voc.mkf',
+			buffer_name: 'VOICE_BUFFER'
+		}, {
 			source: './resources/word.dat',
 			buffer_name: 'WORD_BUFFER'
+		}, {
+			source: './resources/wor16.asc',
+			buffer_name: 'ASCII_BUFFER'
+		}, {
+			source: './resources/wor16.fon',
+			buffer_name: 'FONT_BUFFER'
 		}];
 		for (var i = 1; i <= 87; i++) {
 			if (i == 29) continue;
