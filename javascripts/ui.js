@@ -102,7 +102,7 @@
 			//
 			var j = Math.floor((time - Date.now()) / iDelay / 10);
 			if (j < 0) {
-				for (var i = 0; i < palette.length; i++) {
+				for (var i = 0; i < 256; i++) {
 					var color = {
 						r: 0,
 						g: 0,

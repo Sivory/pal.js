@@ -19,11 +19,14 @@
 		_ins.initResource(function() {
 			_ins.initUI();
 			_ins.writer = new PAL_Writer(_ins);
-			_ins.TrademarkScreen(function() {
-				_ins.splashScreen(function() {
-					_ins.initGame();
-				});
+			// _ins.TrademarkScreen(function() {
+			// _ins.splashScreen(function() {
+			_ins.ui.openingMenu(function(entry) {
+				if (entry == 0) alert('开始了一个新的游戏');
+				else alert('读取存档' + entry);
 			});
+			// });
+			// });
 		});
 	}
 
@@ -76,20 +79,13 @@
 
 	_C.prototype.initGlobals = function() {
 		var _ins = this;
-		_ins.globals = {};
+		_ins.globals = new PAL_Global(_ins);
 	}
 
 	_C.prototype.initUI = function() {
 		var _ins = this;
 		_ins.ui = new PAL_UI(_ins);
 		_ins.rng = new PAL_RngPlayer(_ins);
-	}
-
-	_C.prototype.initGame = function() {
-		var _ins = this;
-		_ins.ui.openingMenu(function(entry) {
-			console.log(entry);
-		});
 	}
 
 	// 大宇LOGO动画
