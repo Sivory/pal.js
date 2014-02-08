@@ -1,7 +1,7 @@
 (function() {
 
 	var LOAD_DATA = function(data, size, chunknum, fp) {
-		if (data == null || size == null || chunknum==null || fp == null) throw "error";
+		if (data == null || size == null || chunknum == null || fp == null) throw "error";
 		PAL_Util.MKFReadChunk(data, size, chunknum, fp);
 	}
 
@@ -418,15 +418,9 @@
 		var _ins = this;
 		var PAL_DOALLOCATE = function(fp, num, type, parent, ptr, n) {
 			var len = PAL_Util.MKFGetChunkSize(num, fp);
-			var buffer = new ArrayBuffer(len);
+			var data = new DataView(new ArrayBuffer(len));
 			parent[n] = Math.floor(len / type.prototype.size);
-			parent[ptr] = [];
-			parent[ptr].data = new DataView(buffer);
-			parent[ptr].size = len;
-			for (var i = 0; i < parent[n]; i++) {
-				var cache = new DataView(buffer, i * type.prototype.size, type.prototype.size);
-				parent[ptr].push(new type(cache));
-			}
+			parent[ptr] = new STRUCT_ARRAY(data, type, parent[n]);
 		}
 
 		//
@@ -467,11 +461,14 @@
 		LOAD_DATA(_ins.g.lprgScriptEntry.data, _ins.g.nScriptEntry * SCRIPTENTRY.prototype.size,
 			4, _ins.game.resource.buffers.SSS_BUFFER);
 
-		LOAD_DATA(_ins.g.lprgStore.data, _ins.g.nStore * STORE.prototype.size, 0, _ins.game.resource.buffers.DATA_BUFFER);
-		LOAD_DATA(_ins.g.lprgEnemy.data, _ins.g.nEnemy * ENEMY.prototype.size, 1, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgStore.data, _ins.g.nStore * STORE.prototype.size,
+			0, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgEnemy.data, _ins.g.nEnemy * ENEMY.prototype.size,
+			1, _ins.game.resource.buffers.DATA_BUFFER);
 		LOAD_DATA(_ins.g.lprgEnemyTeam.data, _ins.g.nEnemyTeam * ENEMYTEAM.prototype.size,
 			2, _ins.game.resource.buffers.DATA_BUFFER);
-		LOAD_DATA(_ins.g.lprgMagic.data, _ins.g.nMagic * MAGIC.prototype.size, 4, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgMagic.data, _ins.g.nMagic * MAGIC.prototype.size,
+			4, _ins.game.resource.buffers.DATA_BUFFER);
 		LOAD_DATA(_ins.g.lprgBattleField.data, _ins.g.nBattleField * BATTLEFIELD.prototype.size,
 			5, _ins.game.resource.buffers.DATA_BUFFER);
 		LOAD_DATA(_ins.g.lprgLevelUpMagic.data, _ins.g.nLevelUpMagic * LEVELUPMAGIC_ALL.prototype.size,

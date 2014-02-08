@@ -95,6 +95,37 @@
 		this.className = "PAL_STRUCT";
 	};
 
+	window.STRUCT_ARRAY = function(data, type, num) {
+		var _ins = this;
+		_ins.struct_array = [];
+		var size = sizeOf(type) * num;
+		_ins.__defineGetter__('data', function() {
+			return data;
+		});
+		_ins.__defineGetter__('type', function() {
+			return type;
+		});
+		_ins.__defineGetter__('num', function() {
+			return num;
+		});
+		_ins.__defineGetter__('size', function() {
+			return size;
+		});
+	}
+
+	window.STRUCT_ARRAY.prototype.getItem = function(index) {
+		var _ins = this;
+		if (index >= _ins.num)
+			return null;
+		if (_ins.struct_array[index] != null)
+			return _ins.struct_array[index];
+		var data = new DataView(_ins.data.buffer,
+			_ins.data.byteOffset + index * sizeOf(_ins.type), sizeOf(_ins.type));
+		var func = _ins.type;
+		_ins.struct_array[index] = new func(data);
+		return _ins.struct_array[index];
+	}
+
 	window.DEFINE_STRUCT = function(map) {
 		var _C = function(data) {
 			var _ins = this;

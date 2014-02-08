@@ -194,7 +194,7 @@
 			}
 
 			for (var i = 0; i < _ins.nEventObject; i++, index++) {
-				var n = _ins.game.globals.g.lprgEventObject[index].wSpriteNum;
+				var n = _ins.game.globals.g.lprgEventObject.getItem(index).wSpriteNum;
 				if (n == 0) {
 					//
 					// this event object has no sprite
@@ -208,7 +208,7 @@
 				_ins.lppEventObjectSprites[i] = new PAL_Sprite(l);
 
 				if (_ins.lppEventObjectSprites[i].loadFromChunk(n, fpMGO, true) > 0) {
-					_ins.game.globals.g.lprgEventObject[index].nSpriteFramesAuto =
+					_ins.game.globals.g.lprgEventObject.getItem(index).nSpriteFramesAuto =
 						_ins.lppEventObjectSprites[i].frameNumber;
 				}
 			}
