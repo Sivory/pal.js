@@ -1,8 +1,22 @@
 (function() {
-	var TOTAL_LENGTH = 42298730;
 
-	var _C = function() {
+	var RESOURCES = DEFINE_STRUCT({
+		bLoadFlags: "BYTE",
+		lpMap: "POINTER", // current loaded map
+		lppEventObjectSprites: "POINTER", // event object sprites
+		nEventObject: "INT", // number of event objects
+		rglpPlayerSprite: ["POINTER", PAL.MAX_PLAYERS_IN_PARTY + 1], // player sprites
+	});
+
+	var OBJECTDESC = DEFINE_STRUCT({
+		wObjectID: "WORD",
+		lpDesc: "POINTER",
+		next: "POINTER"
+	});
+
+	var _C = function(game) {
 		var _ins = this;
+		_ins.game = game;
 		_ins.files = [{
 			source: './resources/abc.mkf',
 			buffer_name: 'ABC_BUFFER'
@@ -49,6 +63,9 @@
 			source: './resources/voc.mkf',
 			buffer_name: 'VOICE_BUFFER'
 		}, {
+			source: './resources/desc.dat',
+			buffer_name: 'DESC_BUFFER'
+		}, {
 			source: './resources/word.dat',
 			buffer_name: 'WORD_BUFFER'
 		}, {
@@ -70,13 +87,15 @@
 		_ins.buffers = {};
 	}
 
-	_C.prototype.load = function(tick, finish, error) {
+	_C.prototype = new RESOURCES();
+
+	_C.prototype.loadFiles = function(tick, finish, error) {
 		var _ins = this;
 		var _tick = function(e) {
 			e.target.PAL_fileData.total = e.total;
 			e.target.PAL_fileData.loaded = e.loaded;
 			e.target.PAL_fileData.status = 'loading';
-			var totalSum = TOTAL_LENGTH;
+			var totalSum = PAL.FILES_TOTAL_LENGTH;
 			var loadedSum = 0;
 			for (var i = 0; i < _ins.files.length; i++) {
 				loadedSum += _ins.files[i].loaded;
@@ -127,6 +146,145 @@
 			xhr.addEventListener("error", _error);
 			xhr.send();
 		}
+	}
+
+	_C.prototype.setLoadFlags = function(bFlags) {
+		var _ins = this;
+		_ins.bLoadFlags |= bFlags;
+	}
+
+	_C.prototype.loadResources = function() {
+		var _ins = this;
+
+		var fpMAP = _ins.buffers.MAP_BUFFER;
+		var fpGOP = _ins.buffers.GOP_BUFFER;
+		var fpMGO = _ins.buffers.MGO_BUFFER;
+
+		//
+		// Load scene
+		//
+		if (_ins.bLoadFlags & PAL.kLoadScene) {
+			if (_ins.game.globals.fEnteringScene) {
+				_ins.game.globals.wScreenWave = 0;
+				_ins.game.globals.sWaveProgression = 0;
+			}
+
+			//
+			// Load map
+			//
+			var i = _ins.game.globals.wNumScene - 1;
+			_ins.lpMap = new PAL_Map(_ins.game.globals.g.rgScene[i].wMapNum, fpMAP, fpGOP);
+
+			if (_ins.lpMap == null) {
+				throw "error";
+			}
+
+			//
+			// Load sprites
+			//
+			var index = _ins.game.globals.g.rgScene[i].wEventObjectIndex;
+			_ins.nEventObject = _ins.game.globals.g.rgScene[i + 1].wEventObjectIndex;
+			_ins.nEventObject -= index;
+
+			if (_ins.nEventObject > 0) {
+				_ins.lppEventObjectSprites = [];
+				for (var i = 0; i < _ins.nEventObject; i++) {
+					_ins.lppEventObjectSprites.push(null);
+				}
+			}
+
+			for (var i = 0; i < _ins.nEventObject; i++, index++) {
+				var n = _ins.game.globals.g.lprgEventObject[index].wSpriteNum;
+				if (n == 0) {
+					//
+					// this event object has no sprite
+					//
+					_ins.lppEventObjectSprites[i] = null;
+					continue;
+				}
+
+				var l = PAL_Util.MKFGetDecompressedSize(n, fpMGO);
+
+				_ins.lppEventObjectSprites[i] = new PAL_Sprite(l);
+
+				if (_ins.lppEventObjectSprites[i].loadFromChunk(n, fpMGO, true) > 0) {
+					_ins.game.globals.g.lprgEventObject[index].nSpriteFramesAuto =
+						_ins.lppEventObjectSprites[i].frameNumber;
+				}
+			}
+
+			_ins.game.globals.partyoffset = {
+				x: 160,
+				y: 112
+			};
+		}
+
+		//
+		// Load player sprites
+		//
+		if (_ins.bLoadFlags & PAL.kLoadPlayerSprite) {
+			for (var i = 0; i <= _ins.game.globals.wMaxPartyMemberIndex; i++) {
+				var wPlayerID = _ins.game.globals.rgParty[i].wPlayerRole;
+
+				//
+				// Load player sprite
+				//
+				var wSpriteNum = _ins.game.globals.g.PlayerRoles.rgwSpriteNum[wPlayerID];
+
+				var l = PAL_Util.MKFGetDecompressedSize(wSpriteNum, fpMGO);
+
+				_ins.rglpPlayerSprite[i] = new PAL_Sprite(l);
+				_ins.rglpPlayerSprite[i].loadFromChunk(wSpriteNum, fpMGO, true);
+			}
+
+			if (_ins.game.globals.nFollower > 0) {
+				//
+				// Load the follower sprite
+				//
+				var wSpriteNum = _ins.game.globals.rgParty[i].wPlayerRole;
+
+				var l = PAL_MKFGetDecompressedSize(wSpriteNum, _ins.game.globals.f.fpMGO);
+
+				_ins.rglpPlayerSprite[i] = new PAL_Sprite(l);
+				_ins.rglpPlayerSprite[i].loadFromChunk(wSpriteNum, fpMGO, true);
+			}
+		}
+
+		//
+		// Clear all of the load flags
+		//
+		_ins.bLoadFlags = 0;
+	}
+
+	_C.prototype.loadObjectDesc = function(fBuffer) {
+		var _ins = this;
+
+		var lpDesc = null,
+			pNew = null;
+
+		var data = new DataView(new ArrayBuffer(512));
+		//
+		// Load the description data
+		//
+		while (PAL_Util.fgets(data, fBuffer) != null) {
+			var p = PAL_Util.strchr(data, '=');
+			if (p == -1) {
+				continue;
+			}
+
+			data.setUint8(p, 0);
+			p++;
+
+			var pNew = new OBJECTDESC();
+
+			var i = PAL_Util.getHex(data);
+			pNew.wObjectID = i;
+			pNew.lpDesc = PAL_Util.strdup(data, p);
+			pNew.next = lpDesc;
+			lpDesc = pNew;
+		}
+
+		return lpDesc;
 	}
 
 	window.PAL_Resource = _C;

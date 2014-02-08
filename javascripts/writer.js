@@ -145,20 +145,6 @@
 		rgszAdditionalWords[i] = new DataView(arr.buffer);
 	}
 
-	var WORD_LENGTH = 10;
-	var FONT_COLOR_DEFAULT = 0x4F;
-	var FONT_COLOR_YELLOW = 0x2D;
-	var FONT_COLOR_RED = 0x1A;
-	var FONT_COLOR_CYAN = 0x8D;
-	var FONT_COLOR_CYAN_ALT = 0x8C;
-
-	var kDialogUpper = 0;
-	var kDialogCenter = 1;
-	var kDialogLower = 2;
-	var kDialogCenterWindow = 3;
-
-	var PAL_ADDITIONAL_WORD_FIRST = 10000;
-
 	var _C = function(game) {
 		var _ins = this;
 		_ins.game = game;
@@ -194,7 +180,7 @@
 		_ins.__defineGetter__('dataWord', function() {
 			return dataWord;
 		});
-		var nWord = Math.floor((dataWord.byteLength + (WORD_LENGTH - 1)) / WORD_LENGTH);
+		var nWord = Math.floor((dataWord.byteLength + (PAL.WORD_LENGTH - 1)) / PAL.WORD_LENGTH);
 		_ins.__defineGetter__('nWord', function() {
 			return nWord;
 		});
@@ -224,7 +210,7 @@
 			return dataDialogIcons;
 		});
 
-		_ins.bCurrentFontColor = FONT_COLOR_DEFAULT;
+		_ins.bCurrentFontColor = PAL.FONT_COLOR_DEFAULT;
 		_ins.bIcon = 0;
 		_ins.posIcon = 0;
 		_ins.nCurrentDialogLine = 0;
@@ -316,18 +302,18 @@
 	_C.prototype.getWord = function(wNumWord) {
 		var _ins = this;
 
-		if (wNumWord >= PAL_ADDITIONAL_WORD_FIRST) {
-			return rgszAdditionalWords[wNumWord - PAL_ADDITIONAL_WORD_FIRST];
+		if (wNumWord >= PAL.PAL_ADDITIONAL_WORD_FIRST) {
+			return rgszAdditionalWords[wNumWord - PAL.PAL_ADDITIONAL_WORD_FIRST];
 		}
 
 		if (wNumWord >= _ins.nWords) {
 			return null;
 		}
 
-		var data = new DataView(new ArrayBuffer(WORD_LENGTH + 1));
+		var data = new DataView(new ArrayBuffer(PAL.WORD_LENGTH + 1));
 
-		PAL_Util.memcpy(data, new DataView(_ins.dataWord.buffer, wNumWord * WORD_LENGTH), WORD_LENGTH);
-		data.setUint8(WORD_LENGTH, 0);
+		PAL_Util.memcpy(data, new DataView(_ins.dataWord.buffer, wNumWord * PAL.WORD_LENGTH), PAL.WORD_LENGTH);
+		data.setUint8(PAL.WORD_LENGTH, 0);
 
 		//
 		// Remove the trailing spaces

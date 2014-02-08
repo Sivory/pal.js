@@ -1,38 +1,118 @@
 (function() {
-	var BITMAPNUM_SPLASH_UP = 0x26;
-	var BITMAPNUM_SPLASH_DOWN = 0x27;
-	var SPRITENUM_SPLASH_TITLE = 0x47;
-	var SPRITENUM_SPLASH_CRANE = 0x49;
-	var NUM_RIX_TITLE = 0x5;
-
 	var _C = function(config) {
 		var containerElement = document.getElementById(config.container);
 		this.container = containerElement;
 	}
 
+	//运行游戏
 	_C.prototype.start = function() {
 		var _ins = this;
-		_ins.initGlobals();
 		_ins.initInput();
 		_ins.sound = new PAL_Sound(_ins);
 		_ins.canvas = new PAL_Canvas(_ins);
 		_ins.initResource(function() {
+			_ins.initGlobals();
 			_ins.initUI();
 			_ins.writer = new PAL_Writer(_ins);
 			// _ins.TrademarkScreen(function() {
 			// _ins.splashScreen(function() {
-			_ins.ui.openingMenu(function(entry) {
-				if (entry == 0) alert('开始了一个新的游戏');
-				else alert('读取存档' + entry);
+			_ins.ui.openingMenu(function(saveSlot) {
+				_ins.gameMain(saveSlot);
 			});
 			// });
 			// });
 		});
 	}
 
+	//在游戏开始/读取的时候做一些初始化工作
+	_C.prototype.gameStart = function() {
+		var _ins = this;
+
+		_ins.resource.setLoadFlags(PAL.kLoadScene | PAL.kLoadPlayerSprite);
+
+		if (!_ins.globals.fEnteringScene) {
+			//
+			// Fade in music if the player has loaded an old game.
+			//
+			PAL_PlayMUS(_ins.globals.wNumMusic, true, 1);
+		}
+
+		_ins.globals.fNeedToFadeIn = true;
+		_ins.globals.dwFrameNum = 0;
+	}
+
+	//初始化游戏数据，启动主循环
+	_C.prototype.gameMain = function(saveSlot) {
+		var _ins = this;
+		_ins.globals.bCurrentSaveSlot = saveSlot;
+		//
+		// Initialize game data and set the flags to load the game resources.
+		//
+		_ins.globals.initGameData(_ins.globals.bCurrentSaveSlot);
+
+		//
+		// Run the main game loop.
+		//
+		var dwTime = Date.now();
+		_ins.input.clearKeyState();
+		(function tick() {
+			if (Date.now() >= dwTime) {
+				//
+				// Do some initialization at game start.
+				//
+				if (_ins.globals.fGameStart) {
+					_ins.gameStart();
+					_ins.globals.fGameStart = false;
+				}
+
+				//
+				// Load the game resources if needed.
+				//
+				_ins.resource.loadResources();
+
+				//
+				// Set the time of the next frame.
+				//
+				dwTime = Date.now() + PAL.FRAME_TIME;
+
+				//
+				// Run the main frame routine.
+				//
+				// PAL_StartFrame(function() {
+				//
+				// Clear the input state of previous frame.
+				//
+				// _ins.input.clearKeyState();
+				// PAL_Util.requestAnimationFrame(tick);
+				// });
+				console.log('done');
+				var map = new PAL_Map(0xc, _ins.resource.buffers.MAP_BUFFER, _ins.resource.buffers.GOP_BUFFER);
+				map.blitTo(_ins.canvas.screen, {
+					x: 320,
+					y: 160,
+					w: 320,
+					h: 200
+				}, 0);
+				map.blitTo(_ins.canvas.screen, {
+					x: 320,
+					y: 160,
+					w: 320,
+					h: 200
+				}, 1);
+				var palette = new PAL_Palette();
+				palette.loadFromChunk(0, false, _ins.resource.buffers.PAT_BUFFER);
+				_ins.ui.fadeIn(palette, 1, function() {
+					console.log('show');
+				});
+			} else {
+				PAL_Util.requestAnimationFrame(tick);
+			}
+		})();
+	}
+
 	_C.prototype.initResource = function(callback) {
 		var _ins = this;
-		_ins.resource = new PAL_Resource();
+		_ins.resource = new PAL_Resource(_ins);
 		var percent = 0;
 		var drawPercent = 0;
 		var opacity = 1;
@@ -62,7 +142,7 @@
 			window.clearInterval(loadingTimer);
 			PAL_DrawErrorScreen(_ins.canvas.canvas, '资源[' + e.target.PAL_fileData.source + ']读取失败');
 		}
-		_ins.resource.load(tick, finish, error);
+		_ins.resource.loadFiles(tick, finish, error);
 	}
 
 	_C.prototype.initInput = function() {
@@ -125,14 +205,14 @@
 		//
 		// Read the bitmaps
 		//
-		lpBitmapUp.loadFromChunk(BITMAPNUM_SPLASH_UP, _ins.resource.buffers.FBP_BUFFER);
-		lpBitmapDown.loadFromChunk(BITMAPNUM_SPLASH_DOWN, _ins.resource.buffers.FBP_BUFFER);
+		lpBitmapUp.loadFromChunk(PAL.BITMAPNUM_SPLASH_UP, _ins.resource.buffers.FBP_BUFFER);
+		lpBitmapDown.loadFromChunk(PAL.BITMAPNUM_SPLASH_DOWN, _ins.resource.buffers.FBP_BUFFER);
 		var spriteTitle = new PAL_Sprite(32000);
-		spriteTitle.loadFromChunk(SPRITENUM_SPLASH_TITLE, _ins.resource.buffers.MGO_BUFFER);
+		spriteTitle.loadFromChunk(PAL.SPRITENUM_SPLASH_TITLE, _ins.resource.buffers.MGO_BUFFER);
 		var bitmapTitle = spriteTitle.getFrame(0);
 
 		var spriteCrane = new PAL_Sprite(32000);
-		spriteCrane.loadFromChunk(SPRITENUM_SPLASH_CRANE, _ins.resource.buffers.MGO_BUFFER);
+		spriteCrane.loadFromChunk(PAL.SPRITENUM_SPLASH_CRANE, _ins.resource.buffers.MGO_BUFFER);
 
 		var iTitleHeight = bitmapTitle.height;
 		bitmapTitle.height = 0;
@@ -151,7 +231,7 @@
 		//
 		// Play the title music
 		//
-		_ins.sound.playMusic(NUM_RIX_TITLE, true, 2);
+		_ins.sound.playMusic(PAL.NUM_RIX_TITLE, true, 2);
 
 		_ins.input.clearKeyState();
 
@@ -244,7 +324,7 @@
 
 				_ins.canvas.flush();
 
-				if (_ins.input.keyPress & (PAL_Input.kKeyMenu | PAL_Input.kKeySearch)) {
+				if (_ins.input.keyPress & (PAL.kKeyMenu | PAL.kKeySearch)) {
 					//
 					// User has pressed a key...
 					//

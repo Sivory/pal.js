@@ -1,34 +1,4 @@
 (function() {
-	var CHUNKNUM_SPRITEUI = 9;
-
-	var MAINMENU_BACKGROUND_FBPNUM = 60;
-	var RIX_NUM_OPENINGMENU = 4;
-	var MAINMENU_LABEL_NEWGAME = 7;
-	var MAINMENU_LABEL_LOADGAME = 8;
-
-	var LOADMENU_LABEL_SLOT_FIRST = 43;
-
-	var MENUITEM_COLOR = 0x4F;
-	var MENUITEM_COLOR_INACTIVE = 0x1C;
-	var MENUITEM_COLOR_CONFIRMED = 0x2C;
-	var MENUITEM_COLOR_SELECTED_INACTIVE = 0x1F;
-	var MENUITEM_COLOR_SELECTED_FIRST = 0xF9;
-	var MENUITEM_COLOR_SELECTED_TOTALNUM = 6;
-	window.__defineGetter__('MENUITEM_COLOR_SELECTED', function() {
-		var e = Math.floor(Date.now() / 100);
-		return MENUITEM_COLOR_SELECTED_FIRST + e % MENUITEM_COLOR_SELECTED_TOTALNUM;
-	});
-
-	var MENUITEM_VALUE_CANCELLED = 0xFFFF;
-
-	var kNumColorYellow = 1;
-	var kNumColorBlue = 2;
-	var kNumColorCyan = 3;
-
-	var kNumAlignLeft = 1;
-	var kNumAlignMid = 2;
-	var kNumAlignRight = 3;
-
 	var _C = function(game) {
 		var _ins = this;
 		_ins.game = game;
@@ -36,9 +6,9 @@
 		//
 		// Load the UI sprite.
 		//
-		var iSize = PAL_Util.MKFGetChunkSize(CHUNKNUM_SPRITEUI, _ins.game.resource.buffers.DATA_BUFFER);
+		var iSize = PAL_Util.MKFGetChunkSize(PAL.CHUNKNUM_SPRITEUI, _ins.game.resource.buffers.DATA_BUFFER);
 		_ins.spriteUI = new PAL_Sprite(iSize);
-		_ins.spriteUI.loadFromChunk(CHUNKNUM_SPRITEUI, _ins.game.resource.buffers.DATA_BUFFER, false);
+		_ins.spriteUI.loadFromChunk(PAL.CHUNKNUM_SPRITEUI, _ins.game.resource.buffers.DATA_BUFFER, false);
 	}
 
 	_C.prototype.setPalette = function(iPaletteNum, fNight) {
@@ -62,7 +32,7 @@
 			//
 			var j = Math.floor((time - Date.now()) / iDelay / 10);
 			if (j < 0) {
-				_ins.game.canvas.setPalette(palette);
+				_ins.game.canvas.setPalette(paletteTemp);
 				_ins.game.canvas.flush();
 				callback();
 				return;
@@ -140,9 +110,9 @@
 
 			if (!menu[i].fEnabled) {
 				if (i == current) {
-					bColor = MENUITEM_COLOR_SELECTED_INACTIVE;
+					bColor = PAL.MENUITEM_COLOR_SELECTED_INACTIVE;
 				} else {
-					bColor = MENUITEM_COLOR_INACTIVE;
+					bColor = PAL.MENUITEM_COLOR_INACTIVE;
 				}
 			}
 
@@ -161,10 +131,10 @@
 			//
 			if (menu[current].fEnabled) {
 				_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-					menu[current].pos, MENUITEM_COLOR_SELECTED, false, true);
+					menu[current].pos, PAL.MENUITEM_COLOR_SELECTED, false, true);
 			}
 
-			if (_ins.game.input.keyPress & (PAL_Input.kKeyDown | PAL_Input.kKeyRight)) {
+			if (_ins.game.input.keyPress & (PAL.kKeyDown | PAL.kKeyRight)) {
 				//
 				// User pressed the down or right arrow key
 				//
@@ -176,7 +146,7 @@
 						menu[current].pos, labelColor, false, true);
 				} else {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_INACTIVE, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_INACTIVE, false, true);
 				}
 
 				current++;
@@ -190,16 +160,16 @@
 				//
 				if (menu[current].fEnabled) {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_SELECTED, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_SELECTED, false, true);
 				} else {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_SELECTED_INACTIVE, false, true);
 				}
 
 				if (typeof change == 'function') {
 					change(menu[current].wValue);
 				}
-			} else if (_ins.game.input.keyPress & (PAL_Input.kKeyUp | PAL_Input.kKeyLeft)) {
+			} else if (_ins.game.input.keyPress & (PAL.kKeyUp | PAL.kKeyLeft)) {
 				//
 				// User pressed the up or left arrow key
 				//
@@ -211,7 +181,7 @@
 						menu[current].pos, labelColor, false, true);
 				} else {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_INACTIVE, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_INACTIVE, false, true);
 				}
 
 				if (current > 0) {
@@ -225,16 +195,16 @@
 				//
 				if (menu[current].fEnabled) {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_SELECTED, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_SELECTED, false, true);
 				} else {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_SELECTED_INACTIVE, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_SELECTED_INACTIVE, false, true);
 				}
 
 				if (typeof change == 'function') {
 					change(menu[current].wValue);
 				}
-			} else if (_ins.game.input.keyPress & PAL_Input.kKeyMenu) {
+			} else if (_ins.game.input.keyPress & PAL.kKeyMenu) {
 				//
 				// User cancelled
 				//
@@ -243,18 +213,18 @@
 						menu[current].pos, labelColor, false, true);
 				} else {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_INACTIVE, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_INACTIVE, false, true);
 				}
 				if (typeof callback == 'function')
-					callback(MENUITEM_VALUE_CANCELLED);
+					callback(PAL.MENUITEM_VALUE_CANCELLED);
 				return;
-			} else if (_ins.game.input.keyPress & PAL_Input.kKeySearch) {
+			} else if (_ins.game.input.keyPress & PAL.kKeySearch) {
 				//
 				// User pressed Enter
 				//
 				if (menu[current].fEnabled) {
 					_ins.game.writer.drawText(_ins.game.writer.getWord(menu[current].wNumWord),
-						menu[current].pos, MENUITEM_COLOR_CONFIRMED, false, true);
+						menu[current].pos, PAL.MENUITEM_COLOR_CONFIRMED, false, true);
 
 					if (typeof callback == 'function')
 						callback(menu[current].wValue);
@@ -272,7 +242,7 @@
 		var wDefaultItem = 0;
 		var rgMainMenuItem = [{
 			wValue: 0,
-			wNumWord: MAINMENU_LABEL_NEWGAME,
+			wNumWord: PAL.MAINMENU_LABEL_NEWGAME,
 			fEnabled: true,
 			pos: {
 				x: 125,
@@ -280,27 +250,27 @@
 			}
 		}, {
 			wValue: 1,
-			wNumWord: MAINMENU_LABEL_LOADGAME,
+			wNumWord: PAL.MAINMENU_LABEL_LOADGAME,
 			fEnabled: true,
 			pos: {
 				x: 125,
 				y: 112
 			}
 		}];
-		_ins.game.sound.playMusic(RIX_NUM_OPENINGMENU, true, 1);
+		_ins.game.sound.playMusic(PAL.RIX_NUM_OPENINGMENU, true, 1);
 		_ins.drawOpeningMenuBackground();
 		var palette = new PAL_Palette();
 		palette.loadFromChunk(0, false, _ins.game.resource.buffers.PAT_BUFFER);
 		_ins.fadeIn(palette, 1, function openMainMenu() {
-			_ins.readMenu(null, rgMainMenuItem, 2, wDefaultItem, MENUITEM_COLOR, function(selectItem) {
-				if (selectItem == 0 || selectItem == MENUITEM_VALUE_CANCELLED) {
+			_ins.readMenu(null, rgMainMenuItem, 2, wDefaultItem, PAL.MENUITEM_COLOR, function(selectItem) {
+				if (selectItem == 0 || selectItem == PAL.MENUITEM_VALUE_CANCELLED) {
 					_ins.game.sound.playMusic(0, false, 1);
 					_ins.fadeOut(1, function() {
 						callback(0);
 					});
 				} else {
 					_ins.saveSlotMenu(1, function(selectItem) {
-						if (selectItem != MENUITEM_VALUE_CANCELLED) {
+						if (selectItem != PAL.MENUITEM_VALUE_CANCELLED) {
 							_ins.game.sound.playMusic(0, false, 1);
 							_ins.fadeOut(1, function() {
 								callback(selectItem);
@@ -318,7 +288,7 @@
 	_C.prototype.drawOpeningMenuBackground = function() {
 		var _ins = this;
 		var fbp = new PAL_Fbp(320, 200);
-		fbp.loadFromChunk(MAINMENU_BACKGROUND_FBPNUM, _ins.game.resource.buffers.FBP_BUFFER);
+		fbp.loadFromChunk(PAL.MAINMENU_BACKGROUND_FBPNUM, _ins.game.resource.buffers.FBP_BUFFER);
 		fbp.blitTo(_ins.game.canvas.screen);
 	}
 
@@ -328,7 +298,7 @@
 		//
 		// Get the bitmaps. Blue starts from 29, Cyan from 56, Yellow from 19.
 		//
-		var x = (color == kNumColorBlue) ? 29 : ((color == kNumColorCyan) ? 56 : 19);
+		var x = (color == PAL.kNumColorBlue) ? 29 : ((color == PAL.kNumColorCyan) ? 56 : 19);
 		var rglpBitmap = [];
 		for (var i = 0; i < 10; i++) {
 			rglpBitmap[i] = _ins.spriteUI.getFrame(x + i);
@@ -355,15 +325,15 @@
 		var y = pos.y;
 
 		switch (align) {
-			case kNumAlignLeft:
+			case PAL.kNumAlignLeft:
 				x += 6 * nActualLength;
 				break;
 
-			case kNumAlignMid:
+			case PAL.kNumAlignMid:
 				x += 3 * (nLength + nActualLength);
 				break;
 
-			case kNumAlignRight:
+			case PAL.kNumAlignRight:
 				x += 6 * nLength;
 				break;
 		}
@@ -405,7 +375,7 @@
 			rgMenuItem[i] = {};
 			rgMenuItem[i].wValue = i + 1;
 			rgMenuItem[i].fEnabled = true;
-			rgMenuItem[i].wNumWord = LOADMENU_LABEL_SLOT_FIRST + i;
+			rgMenuItem[i].wNumWord = PAL.LOADMENU_LABEL_SLOT_FIRST + i;
 			rgMenuItem[i].pos = {
 				x: 210,
 				y: 17 + 38 * i
@@ -429,7 +399,7 @@
 			_ins.drawNumber(wSavedTimes, 4, {
 				x: 270,
 				y: 38 * i - 17
-			}, kNumColorYellow, kNumAlignRight);
+			}, PAL.kNumColorYellow, PAL.kNumAlignRight);
 		}
 
 		_ins.game.canvas.flush();
@@ -437,7 +407,7 @@
 		//
 		// Activate the menu
 		//
-		_ins.readMenu(null, rgMenuItem, 5, defaultSlot - 1, MENUITEM_COLOR, function(wItemSelected) {
+		_ins.readMenu(null, rgMenuItem, 5, defaultSlot - 1, PAL.MENUITEM_COLOR, function(wItemSelected) {
 			//
 			// Delete the boxes
 			//

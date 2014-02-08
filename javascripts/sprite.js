@@ -43,9 +43,9 @@
 		if (compressed == null)
 			compressed = true;
 		if (compressed) {
-			PAL_Util.MKFDecompressChunk(_ins.data, _ins.size, index, fBuffer);
+			return PAL_Util.MKFDecompressChunk(_ins.data, _ins.size, index, fBuffer);
 		} else {
-			PAL_Util.MKFReadChunk(_ins.data, _ins.size, index, fBuffer);
+			return PAL_Util.MKFReadChunk(_ins.data, _ins.size, index, fBuffer);
 		}
 	}
 

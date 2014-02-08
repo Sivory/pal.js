@@ -1,82 +1,9 @@
 (function() {
-	// maximum number of players in party
-	var MAX_PLAYERS_IN_PARTY = 3;
 
-	// total number of possible player roles
-	var MAX_PLAYER_ROLES = 6;
-
-	// totally number of playable player roles
-	var MAX_PLAYABLE_PLAYER_ROLES = 5;
-
-	// maximum entries of inventory
-	var MAX_INVENTORY = 256;
-
-	// maximum items in a store
-	var MAX_STORE_ITEM = 9;
-
-	// total number of magic attributes
-	var NUM_MAGIC_ELEMENTAL = 5;
-
-	// maximum number of enemies in a team
-	var MAX_ENEMIES_IN_TEAM = 5;
-
-	// maximum number of equipments for a player
-	var MAX_PLAYER_EQUIPMENTS = 6;
-
-	// maximum number of magics for a player
-	var MAX_PLAYER_MAGICS = 32;
-
-	// maximum number of scenes
-	var MAX_SCENES = 300;
-
-	// maximum number of objects
-	var MAX_OBJECTS = 600;
-
-	// maximum number of event objects (should be somewhat more than the original,
-	// as there are some modified versions which has more)
-	var MAX_EVENT_OBJECTS = 5500;
-
-	// maximum number of effective poisons to players
-	var MAX_POISONS = 16;
-
-	// maximum number of level
-	var MAX_LEVELS = 99;
-
-	// status of characters
-	var kStatusConfused = 0, // attack friends randomly
-		kStatusParalyzed = 1, // paralyzed
-		kStatusSleep = 2, // not allowed to move
-		kStatusSilence = 3, // cannot use magic
-		kStatusPuppet = 4, // for dead players only, continue attacking
-		kStatusBravery = 5, // more power for physical attacks
-		kStatusProtect = 6, // more defense value
-		kStatusHaste = 7, // faster
-		kStatusDualAttack = 8, // dual attack
-		kStatusAll = 9;
-
-	// body parts of equipments
-	var kBodyPartHead = 0,
-		kBodyPartBody = 1,
-		kBodyPartShoulder = 2,
-		kBodyPartHand = 3,
-		kBodyPartFeet = 4,
-		kBodyPartWear = 5,
-		kBodyPartExtra = 6;
-
-	// state of event object, used by the sState field of the EVENTOBJECT struct
-	var kObjStateHidden = 0,
-		kObjStateNormal = 1,
-		kObjStateBlocker = 2;
-
-	var kTriggerNone = 0,
-		kTriggerSearchNear = 1,
-		kTriggerSearchNormal = 2,
-		kTriggerSearchFar = 3,
-		kTriggerTouchNear = 4,
-		kTriggerTouchNormal = 5,
-		kTriggerTouchFar = 6,
-		kTriggerTouchFarther = 7,
-		kTriggerTouchFarthest = 8;
+	var LOAD_DATA = function(data, size, chunknum, fp) {
+		if (data == null || size == null || chunknum==null || fp == null) throw "error";
+		PAL_Util.MKFReadChunk(data, size, chunknum, fp);
+	}
 
 	var EVENTOBJECT = DEFINE_STRUCT({
 		sVanishTime: "SHORT", // vanish time (?)
@@ -113,14 +40,6 @@
 		wScriptOnDying: "WORD", // when dying, execute script from here
 	});
 
-	var kItemFlagUsable = (1 << 0),
-		kItemFlagEquipable = (1 << 1),
-		kItemFlagThrowable = (1 << 2),
-		kItemFlagConsuming = (1 << 3),
-		kItemFlagApplyToAll = (1 << 4),
-		kItemFlagSellable = (1 << 5),
-		kItemFlagEquipableByPlayerRole_First = (1 << 6);
-
 	// items
 	var OBJECT_ITEM = DEFINE_STRUCT({
 		wBitmap: "WORD", // bitmap number in BALL.MKF
@@ -130,11 +49,6 @@
 		wScriptOnThrow: "WORD", // script executed when throwing this item to enemy
 		wFlags: "WORD", // flags
 	});
-
-	var kMagicFlagUsableOutsideBattle = (1 << 0),
-		kMagicFlagUsableInBattle = (1 << 1),
-		kMagicFlagUsableToEnemy = (1 << 3),
-		kMagicFlagApplyToAll = (1 << 4);
 
 	// magics
 	var OBJECT_MAGIC = DEFINE_STRUCT({
@@ -186,7 +100,7 @@
 	});
 
 	var STORE = DEFINE_STRUCT({
-		rgwItems: ["WORD", MAX_STORE_ITEM],
+		rgwItems: ["WORD", PAL.MAX_STORE_ITEM],
 	});
 
 	var ENEMY = DEFINE_STRUCT({
@@ -217,68 +131,59 @@
 		wDexterity: "WORD", // dexterity
 		wFleeRate: "WORD", // chance for successful fleeing
 		wPoisonResistance: "WORD", // resistance to poison
-		wElemResistance: ["WORD", NUM_MAGIC_ELEMENTAL], // resistance to elemental magics
+		wElemResistance: ["WORD", PAL.NUM_MAGIC_ELEMENTAL], // resistance to elemental magics
 		wPhysicalResistance: "WORD", // resistance to physical attack
 		wDualMove: "WORD", // whether this enemy can do dual move or not
 		wCollectValue: "WORD", // value for collecting this enemy for items
 	});
 
 	var ENEMYTEAM = DEFINE_STRUCT({
-		rgwEnemy: ["WORD", MAX_ENEMIES_IN_TEAM],
+		rgwEnemy: ["WORD", PAL.MAX_ENEMIES_IN_TEAM],
 	});
 
 	var PLAYERROLES = DEFINE_STRUCT({
-		rgwAvatar: ["WORD", MAX_PLAYER_ROLES], // avatar (shown in status view)
-		rgwSpriteNumInBattle: ["WORD", MAX_PLAYER_ROLES], // sprite displayed in battle (in F.MKF)
-		rgwSpriteNum: ["WORD", MAX_PLAYER_ROLES], // sprite displayed in normal scene (in MGO.MKF)
-		rgwName: ["WORD", MAX_PLAYER_ROLES], // name of player class (in WORD.DAT)
-		rgwAttackAll: ["WORD", MAX_PLAYER_ROLES], // whether player can attack everyone in a bulk or not
-		rgwUnknown1: ["WORD", MAX_PLAYER_ROLES], // FIXME: ???
-		rgwLevel: ["WORD", MAX_PLAYER_ROLES], // level
-		rgwMaxHP: ["WORD", MAX_PLAYER_ROLES], // maximum HP
-		rgwMaxMP: ["WORD", MAX_PLAYER_ROLES], // maximum MP
-		rgwHP: ["WORD", MAX_PLAYER_ROLES], // current HP
-		rgwMP: ["WORD", MAX_PLAYER_ROLES], // current MP
+		rgwAvatar: ["WORD", PAL.MAX_PLAYER_ROLES], // avatar (shown in status view)
+		rgwSpriteNumInBattle: ["WORD", PAL.MAX_PLAYER_ROLES], // sprite displayed in battle (in F.MKF)
+		rgwSpriteNum: ["WORD", PAL.MAX_PLAYER_ROLES], // sprite displayed in normal scene (in MGO.MKF)
+		rgwName: ["WORD", PAL.MAX_PLAYER_ROLES], // name of player class (in WORD.DAT)
+		rgwAttackAll: ["WORD", PAL.MAX_PLAYER_ROLES], // whether player can attack everyone in a bulk or not
+		rgwUnknown1: ["WORD", PAL.MAX_PLAYER_ROLES], // FIXME: ???
+		rgwLevel: ["WORD", PAL.MAX_PLAYER_ROLES], // level
+		rgwMaxHP: ["WORD", PAL.MAX_PLAYER_ROLES], // maximum HP
+		rgwMaxMP: ["WORD", PAL.MAX_PLAYER_ROLES], // maximum MP
+		rgwHP: ["WORD", PAL.MAX_PLAYER_ROLES], // current HP
+		rgwMP: ["WORD", PAL.MAX_PLAYER_ROLES], // current MP
 		rgwEquipment: [
-			["WORD", MAX_PLAYER_ROLES], MAX_PLAYER_EQUIPMENTS
+			["WORD", PAL.MAX_PLAYER_ROLES], PAL.MAX_PLAYER_EQUIPMENTS
 		], // equipments
-		rgwAttackStrength: ["WORD", MAX_PLAYER_ROLES], // normal attack strength
-		rgwMagicStrength: ["WORD", MAX_PLAYER_ROLES], // magical attack strength
-		rgwDefense: ["WORD", MAX_PLAYER_ROLES], // resistance to all kinds of attacking
-		rgwDexterity: ["WORD", MAX_PLAYER_ROLES], // dexterity
-		rgwFleeRate: ["WORD", MAX_PLAYER_ROLES], // chance of successful fleeing
-		rgwPoisonResistance: ["WORD", MAX_PLAYER_ROLES], // resistance to poison
+		rgwAttackStrength: ["WORD", PAL.MAX_PLAYER_ROLES], // normal attack strength
+		rgwMagicStrength: ["WORD", PAL.MAX_PLAYER_ROLES], // magical attack strength
+		rgwDefense: ["WORD", PAL.MAX_PLAYER_ROLES], // resistance to all kinds of attacking
+		rgwDexterity: ["WORD", PAL.MAX_PLAYER_ROLES], // dexterity
+		rgwFleeRate: ["WORD", PAL.MAX_PLAYER_ROLES], // chance of successful fleeing
+		rgwPoisonResistance: ["WORD", PAL.MAX_PLAYER_ROLES], // resistance to poison
 		rgwElementalResistance: [
-			["WORD", MAX_PLAYER_ROLES], NUM_MAGIC_ELEMENTAL
+			["WORD", PAL.MAX_PLAYER_ROLES], PAL.NUM_MAGIC_ELEMENTAL
 		], // resistance to elemental magics
-		rgwUnknown2: ["WORD", MAX_PLAYER_ROLES], // FIXME: ???
-		rgwUnknown3: ["WORD", MAX_PLAYER_ROLES], // FIXME: ???
-		rgwUnknown4: ["WORD", MAX_PLAYER_ROLES], // FIXME: ???
-		rgwCoveredBy: ["WORD", MAX_PLAYER_ROLES], // who will cover me when I am low of HP or not sane
+		rgwUnknown2: ["WORD", PAL.MAX_PLAYER_ROLES], // FIXME: ???
+		rgwUnknown3: ["WORD", PAL.MAX_PLAYER_ROLES], // FIXME: ???
+		rgwUnknown4: ["WORD", PAL.MAX_PLAYER_ROLES], // FIXME: ???
+		rgwCoveredBy: ["WORD", PAL.MAX_PLAYER_ROLES], // who will cover me when I am low of HP or not sane
 		rgwMagic: [
-			["WORD", MAX_PLAYER_ROLES], MAX_PLAYER_MAGICS
+			["WORD", PAL.MAX_PLAYER_ROLES], PAL.MAX_PLAYER_MAGICS
 		], // magics
-		rgwWalkFrames: ["WORD", MAX_PLAYER_ROLES], // walk frame (???)
-		rgwCooperativeMagic: ["WORD", MAX_PLAYER_ROLES], // cooperative magic
-		rgwUnknown5: ["WORD", MAX_PLAYER_ROLES], // FIXME: ???
-		rgwUnknown6: ["WORD", MAX_PLAYER_ROLES], // FIXME: ???
-		rgwDeathSound: ["WORD", MAX_PLAYER_ROLES], // sound played when player dies
-		rgwAttackSound: ["WORD", MAX_PLAYER_ROLES], // sound played when player attacks
-		rgwWeaponSound: ["WORD", MAX_PLAYER_ROLES], // weapon sound (???)
-		rgwCriticalSound: ["WORD", MAX_PLAYER_ROLES], // sound played when player make critical hits
-		rgwMagicSound: ["WORD", MAX_PLAYER_ROLES], // sound played when player is casting a magic
-		rgwCoverSound: ["WORD", MAX_PLAYER_ROLES], // sound played when player cover others
-		rgwDyingSound: ["WORD", MAX_PLAYER_ROLES], // sound played when player is dying
+		rgwWalkFrames: ["WORD", PAL.MAX_PLAYER_ROLES], // walk frame (???)
+		rgwCooperativeMagic: ["WORD", PAL.MAX_PLAYER_ROLES], // cooperative magic
+		rgwUnknown5: ["WORD", PAL.MAX_PLAYER_ROLES], // FIXME: ???
+		rgwUnknown6: ["WORD", PAL.MAX_PLAYER_ROLES], // FIXME: ???
+		rgwDeathSound: ["WORD", PAL.MAX_PLAYER_ROLES], // sound played when player dies
+		rgwAttackSound: ["WORD", PAL.MAX_PLAYER_ROLES], // sound played when player attacks
+		rgwWeaponSound: ["WORD", PAL.MAX_PLAYER_ROLES], // weapon sound (???)
+		rgwCriticalSound: ["WORD", PAL.MAX_PLAYER_ROLES], // sound played when player make critical hits
+		rgwMagicSound: ["WORD", PAL.MAX_PLAYER_ROLES], // sound played when player is casting a magic
+		rgwCoverSound: ["WORD", PAL.MAX_PLAYER_ROLES], // sound played when player cover others
+		rgwDyingSound: ["WORD", PAL.MAX_PLAYER_ROLES], // sound played when player is dying
 	});
-
-	var kMagicTypeNormal = 0,
-		kMagicTypeAttackAll = 1, // draw the effect on each of the enemies
-		kMagicTypeAttackWhole = 2, // draw the effect on the whole enemy team
-		kMagicTypeAttackField = 3, // draw the effect on the battle field
-		kMagicTypeApplyToPlayer = 4, // the magic is used on one player
-		kMagicTypeApplyToParty = 5, // the magic is used on the whole party
-		kMagicTypeTrance = 8, // trance the player
-		kMagicTypeSummon = 9; // summon
 
 	var MAGIC = DEFINE_STRUCT({
 		wEffect: "WORD", // effect sprite
@@ -301,7 +206,7 @@
 
 	var BATTLEFIELD = DEFINE_STRUCT({
 		wScreenWave: "WORD", // level of screen waving
-		rgsMagicEffect: ["SHORT", NUM_MAGIC_ELEMENTAL], // effect of attributed magics
+		rgsMagicEffect: ["SHORT", PAL.NUM_MAGIC_ELEMENTAL], // effect of attributed magics
 	});
 
 	// magics learned when level up
@@ -311,7 +216,7 @@
 	});
 
 	var LEVELUPMAGIC_ALL = DEFINE_STRUCT({
-		m: [LEVELUPMAGIC, MAX_PLAYABLE_PLAYER_ROLES],
+		m: [LEVELUPMAGIC, PAL.MAX_PLAYABLE_PLAYER_ROLES],
 	});
 
 	var POS2D = DEFINE_STRUCT({
@@ -321,7 +226,7 @@
 
 	var ENEMYPOS = DEFINE_STRUCT({
 		pos: [
-			[POS2D, MAX_ENEMIES_IN_TEAM], MAX_ENEMIES_IN_TEAM
+			[POS2D, PAL.MAX_ENEMIES_IN_TEAM], PAL.MAX_ENEMIES_IN_TEAM
 		],
 	});
 
@@ -329,8 +234,8 @@
 	var GAMEDATA = DEFINE_STRUCT({
 		lprgEventObject: "POINTER",
 		nEventObject: "INT",
-		rgScene: [SCENE, MAX_SCENES],
-		rgObject: [OBJECT, MAX_OBJECTS],
+		rgScene: [SCENE, PAL.MAX_SCENES],
+		rgObject: [OBJECT, PAL.MAX_OBJECTS],
 		lprgScriptEntry: "POINTER",
 		nScriptEntry: "INT",
 		lprgStore: "POINTER",
@@ -347,7 +252,7 @@
 		lprgLevelUpMagic: "POINTER",
 		nLevelUpMagic: "INT",
 		EnemyPos: ENEMYPOS,
-		rgLevelUpExp: ["WORD", MAX_LEVELS + 1],
+		rgLevelUpExp: ["WORD", PAL.MAX_LEVELS + 1],
 		rgwBattleEffectIndex: [
 			["WORD", 2], 10
 		],
@@ -377,14 +282,14 @@
 	});
 
 	var ALLEXPERIENCE = DEFINE_STRUCT({
-		rgPrimaryExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgHealthExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgMagicExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgAttackExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgMagicPowerExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgDefenseExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgDexterityExp: [EXPERIENCE, MAX_PLAYER_ROLES],
-		rgFleeExp: [EXPERIENCE, MAX_PLAYER_ROLES],
+		rgPrimaryExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgHealthExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgMagicExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgAttackExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgMagicPowerExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgDefenseExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgDexterityExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
+		rgFleeExp: [EXPERIENCE, PAL.MAX_PLAYER_ROLES],
 	});
 
 	var POISONSTATUS = DEFINE_STRUCT({
@@ -407,17 +312,17 @@
 		fAutoBattle: "BOOL", // TRUE if auto-battle
 		wLastUnequippedItem: "WORD", // last unequipped item
 
-		rgEquipmentEffect: [PLAYERROLES, MAX_PLAYER_EQUIPMENTS + 1], // equipment effects
+		rgEquipmentEffect: [PLAYERROLES, PAL.MAX_PLAYER_EQUIPMENTS + 1], // equipment effects
 		rgPlayerStatus: [
-			["WORD", kStatusAll], MAX_PLAYER_ROLES
+			["WORD", PAL.kStatusAll], PAL.MAX_PLAYER_ROLES
 		], // player status
 
-		viewport: "DWORD", // viewport coordination
+		viewport: "POINTER", // viewport coordination
 		partyoffset: "DWORD",
 		wLayer: "WORD",
 		wMaxPartyMemberIndex: "WORD", // max index of members in party (0 to MAX_PLAYERS_IN_PARTY - 1)
-		rgParty: [PARTY, MAX_PLAYABLE_PLAYER_ROLES], // player party
-		rgTrail: [TRAIL, MAX_PLAYABLE_PLAYER_ROLES], // player trail
+		rgParty: [PARTY, PAL.MAX_PLAYABLE_PLAYER_ROLES], // player party
+		rgTrail: [TRAIL, PAL.MAX_PLAYABLE_PLAYER_ROLES], // player trail
 		wPartyDirection: "WORD", // direction of the party
 		wNumScene: "WORD", // current scene number
 		wNumPalette: "WORD", // current palette number
@@ -436,9 +341,9 @@
 
 		Exp: ALLEXPERIENCE, // experience status
 		rgPoisonStatus: [
-			[POISONSTATUS, MAX_PLAYABLE_PLAYER_ROLES], MAX_POISONS
+			[POISONSTATUS, PAL.MAX_PLAYABLE_PLAYER_ROLES], PAL.MAX_POISONS
 		], // poison status
-		rgInventory: [INVENTORY, MAX_INVENTORY], // inventory status
+		rgInventory: [INVENTORY, PAL.MAX_INVENTORY], // inventory status
 
 		lpObjectDesc: "POINTER",
 
@@ -465,25 +370,269 @@
 		nFollower: "WORD",
 		rgwReserved2: ["WORD", 3], // unused
 		dwCash: "DWORD", // amount of cash
-		rgParty: [PARTY, MAX_PLAYABLE_PLAYER_ROLES], // player party
-		rgTrail: [TRAIL, MAX_PLAYABLE_PLAYER_ROLES], // player trail
+		rgParty: [PARTY, PAL.MAX_PLAYABLE_PLAYER_ROLES], // player party
+		rgTrail: [TRAIL, PAL.MAX_PLAYABLE_PLAYER_ROLES], // player trail
 		Exp: ALLEXPERIENCE, // experience data
 		PlayerRoles: PLAYERROLES,
 		rgPoisonStatus: [
-			[POISONSTATUS, MAX_PLAYABLE_PLAYER_ROLES], MAX_POISONS
+			[POISONSTATUS, PAL.MAX_PLAYABLE_PLAYER_ROLES], PAL.MAX_POISONS
 		], // poison status
-		rgInventory: [INVENTORY, MAX_INVENTORY], // inventory status
-		rgScene: [SCENE, MAX_SCENES],
-		rgObject: [OBJECT, MAX_OBJECTS],
-		rgEventObject: [EVENTOBJECT, MAX_EVENT_OBJECTS],
+		rgInventory: [INVENTORY, PAL.MAX_INVENTORY], // inventory status
+		rgScene: [SCENE, PAL.MAX_SCENES],
+		rgObject: [OBJECT, PAL.MAX_OBJECTS],
+		rgEventObject: [EVENTOBJECT, PAL.MAX_EVENT_OBJECTS],
 	});
 
 	var _C = function(game) {
 		var _ins = this;
 		_ins.game = game;
-
+		_ins.lpObjectDesc = _ins.game.resource.loadObjectDesc(_ins.game.resource.buffers.DESC_BUFFER);
 		_ins.bCurrentSaveSlot = 1;
 	}
 	_C.prototype = new GLOBALVARS();
+	_C.prototype.initGameData = function(iSaveSlot) {
+		var _ins = this;
+		_ins.initGlobalGameData();
+		_ins.bCurrentSaveSlot = iSaveSlot;
+
+		//
+		// try loading from the saved game file.
+		//
+		if (iSaveSlot == 0 || _ins.loadGame(iSaveSlot + ".rpg") != 0) {
+			//
+			// Cannot load the saved game file. Load the defaults.
+			//
+			_ins.loadDefaultGame();
+		}
+
+		_ins.fGameStart = true;
+		_ins.fNeedToFadeIn = false;
+		_ins.iCurInvMenuItem = 0;
+		_ins.fInBattle = false;
+
+		PAL_Util.memset(_ins.rgPlayerStatus.data, 0, _ins.rgPlayerStatus.size);
+		_ins.updateEquipments();
+	}
+
+	_C.prototype.initGlobalGameData = function() {
+		var _ins = this;
+		var PAL_DOALLOCATE = function(fp, num, type, parent, ptr, n) {
+			var len = PAL_Util.MKFGetChunkSize(num, fp);
+			var buffer = new ArrayBuffer(len);
+			parent[n] = Math.floor(len / type.prototype.size);
+			parent[ptr] = [];
+			parent[ptr].data = new DataView(buffer);
+			parent[ptr].size = len;
+			for (var i = 0; i < parent[n]; i++) {
+				var cache = new DataView(buffer, i * type.prototype.size, type.prototype.size);
+				parent[ptr].push(new type(cache));
+			}
+		}
+
+		//
+		// If the memory has not been allocated, allocate first.
+		//
+		if (_ins.g.lprgEventObject == null) {
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.SSS_BUFFER, 0, EVENTOBJECT,
+				_ins.g, 'lprgEventObject', 'nEventObject');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.SSS_BUFFER, 4, SCRIPTENTRY,
+				_ins.g, 'lprgScriptEntry', 'nScriptEntry');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.DATA_BUFFER, 0, STORE,
+				_ins.g, 'lprgStore', 'nStore');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.DATA_BUFFER, 1, ENEMY,
+				_ins.g, 'lprgEnemy', 'nEnemy');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.DATA_BUFFER, 2, ENEMYTEAM,
+				_ins.g, 'lprgEnemyTeam', 'nEnemyTeam');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.DATA_BUFFER, 4, MAGIC,
+				_ins.g, 'lprgMagic', 'nMagic');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.DATA_BUFFER, 5, BATTLEFIELD,
+				_ins.g, 'lprgBattleField', 'nBattleField');
+
+			PAL_DOALLOCATE(_ins.game.resource.buffers.DATA_BUFFER, 6, LEVELUPMAGIC_ALL,
+				_ins.g, 'lprgLevelUpMagic', 'nLevelUpMagic');
+
+			_ins.readGlobalGameData();
+		}
+	}
+
+	_C.prototype.readGlobalGameData = function() {
+		var _ins = this;
+		LOAD_DATA(_ins.g.lprgScriptEntry.data, _ins.g.nScriptEntry * SCRIPTENTRY.prototype.size,
+			4, _ins.game.resource.buffers.SSS_BUFFER);
+
+		LOAD_DATA(_ins.g.lprgStore.data, _ins.g.nStore * STORE.prototype.size, 0, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgEnemy.data, _ins.g.nEnemy * ENEMY.prototype.size, 1, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgEnemyTeam.data, _ins.g.nEnemyTeam * ENEMYTEAM.prototype.size,
+			2, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgMagic.data, _ins.g.nMagic * MAGIC.prototype.size, 4, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgBattleField.data, _ins.g.nBattleField * BATTLEFIELD.prototype.size,
+			5, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.lprgLevelUpMagic.data, _ins.g.nLevelUpMagic * LEVELUPMAGIC_ALL.prototype.size,
+			6, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.rgwBattleEffectIndex.data, _ins.g.rgwBattleEffectIndex.size,
+			11, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.EnemyPos.data, _ins.g.EnemyPos.size,
+			13, _ins.game.resource.buffers.DATA_BUFFER);
+		LOAD_DATA(_ins.g.rgLevelUpExp.data, _ins.g.rgLevelUpExp.size,
+			14, _ins.game.resource.buffers.DATA_BUFFER);
+	}
+
+	_C.prototype.loadDefaultGame = function() {
+		var _ins = this;
+		var p = _ins.g;
+
+		//
+		// Load the default data from the game data files.
+		//
+		LOAD_DATA(p.lprgEventObject.data, p.nEventObject * EVENTOBJECT.prototype.size, 0, _ins.game.resource.buffers.SSS_BUFFER);
+		LOAD_DATA(p.rgScene.data, p.rgScene.size, 1, _ins.game.resource.buffers.SSS_BUFFER);
+		LOAD_DATA(p.rgObject.data, p.rgObject.size, 2, _ins.game.resource.buffers.SSS_BUFFER);
+		LOAD_DATA(p.PlayerRoles.data, PLAYERROLES.prototype.size, 3, _ins.game.resource.buffers.DATA_BUFFER);
+
+		//
+		// Set some other default data.
+		//
+		_ins.dwCash = 0;
+		_ins.wNumMusic = 0;
+		_ins.wNumPalette = 0;
+		_ins.wNumScene = 1;
+		_ins.wCollectValue = 0;
+		_ins.fNightPalette = false;
+		_ins.wMaxPartyMemberIndex = 0;
+		_ins.viewport = {
+			x: 0,
+			y: 0
+		};
+		_ins.wLayer = 0;
+		_ins.wChaseRange = 1;
+
+		PAL_Util.memset(_ins.rgInventory.data, 0, _ins.rgInventory.size);
+		PAL_Util.memset(_ins.rgPoisonStatus.data, 0, _ins.rgPoisonStatus.size);
+		PAL_Util.memset(_ins.rgParty.data, 0, _ins.rgParty.size);
+		PAL_Util.memset(_ins.rgTrail.data, 0, _ins.rgTrail.size);
+		PAL_Util.memset(_ins.Exp.data, 0, _ins.Exp.size);
+
+		for (var i = 0; i < PAL.MAX_PLAYER_ROLES; i++) {
+			_ins.Exp.rgPrimaryExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgHealthExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgMagicExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgAttackExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgMagicPowerExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgDefenseExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgDexterityExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+			_ins.Exp.rgFleeExp[i].wLevel = p.PlayerRoles.rgwLevel[i];
+		}
+
+		_ins.fEnteringScene = true;
+	}
+
+	_C.prototype.loadGame = function(savename) {
+		//
+		// Try to open the specified file
+		//
+		var fp = localStorage.getItem(savename);
+		if (fp == null) {
+			return -1;
+		}
+
+		//
+		// Read all data from the file.
+		//
+		var data = BASE64.decodeB(fp);
+		var s = new SAVEDGAME(data);
+
+		//
+		// Cash amount is in DWORD, so do a wordswap in Big-Endian.
+		//
+		s.dwCash = PAL_Util.SWAP16(s.dwCash);
+
+		//
+		// Get all the data from the saved game struct.
+		//
+		_ins.viewport = {
+			x: s.wViewportX,
+			y: s.wViewportY
+		};
+		_ins.wMaxPartyMemberIndex = s.nPartyMember;
+		_ins.wNumScene = s.wNumScene;
+		_ins.fNightPalette = (s.wPaletteOffset != 0);
+		_ins.wPartyDirection = s.wPartyDirection;
+		_ins.wNumMusic = s.wNumMusic;
+		_ins.wNumBattleMusic = s.wNumBattleMusic;
+		_ins.wNumBattleField = s.wNumBattleField;
+		_ins.wScreenWave = s.wScreenWave;
+		_ins.sWaveProgression = 0;
+		_ins.wCollectValue = s.wCollectValue;
+		_ins.wLayer = s.wLayer;
+		_ins.wChaseRange = s.wChaseRange;
+		_ins.wChasespeedChangeCycles = s.wChasespeedChangeCycles;
+		_ins.nFollower = s.nFollower;
+		_ins.dwCash = s.dwCash;
+
+		PAL_Util.memcpy(_ins.rgParty.data, s.rgParty.data, _ins.rgParty.size);
+		PAL_Util.memcpy(_ins.rgTrail.data, s.rgTrail.data, _ins.rgTrail.size);
+		_ins.Exp = s.Exp;
+		_ins.g.PlayerRoles = s.PlayerRoles;
+		PAL_Util.memset(_ins.rgPoisonStatus.data, 0, _ins.rgPoisonStatus.size);
+		PAL_Util.memcpy(_ins.rgInventory.data, s.rgInventory.data, _ins.rgInventory.size);
+		PAL_Util.memcpy(_ins.g.rgScene.data, s.rgScene.data, _ins.g.rgScene.size);
+		PAL_Util.memcpy(_ins.g.rgObject.data, s.rgObject.data, _ins.g.rgObject.size);
+		PAL_Util.memcpy(_ins.g.lprgEventObject.data, s.rgEventObject.data, EVENTOBJECT.prototype.size * _ins.g.nEventObject);
+
+		_ins.fEnteringScene = false;
+
+		_ins.compressInventory();
+
+		//
+		// Success
+		//
+		return 0;
+	}
+
+	_C.prototype.compressInventory = function() {
+		var _ins = this;
+		var j = 0;
+
+		for (var i = 0; i < PAL.MAX_INVENTORY; i++) {
+			if (_ins.rgInventory[i].wItem == 0) {
+				break;
+			}
+
+			if (_ins.rgInventory[i].nAmount > 0) {
+				_ins.rgInventory[j] = _ins.rgInventory[i];
+				j++;
+			}
+		}
+
+		for (; j < PAL.MAX_INVENTORY; j++) {
+			_ins.rgInventory[j].nAmount = 0;
+			_ins.rgInventory[j].nAmountInUse = 0;
+			_ins.rgInventory[j].wItem = 0;
+		}
+	}
+
+	_C.prototype.updateEquipments = function() {
+		var _ins = this;
+
+		PAL_Util.memset(_ins.rgEquipmentEffect.data, 0, _ins.rgEquipmentEffect.size);
+
+		for (var i = 0; i < PAL.MAX_PLAYER_ROLES; i++) {
+			for (var j = 0; j < PAL.MAX_PLAYER_EQUIPMENTS; j++) {
+				var w = _ins.g.PlayerRoles.rgwEquipment[j][i];
+				if (w != 0) {
+					// fix me when script.js ready
+					// _ins.g.rgObject[w].item.wScriptOnEquip = PAL_RunTriggerScript(_ins.g.rgObject[w].item.wScriptOnEquip, i);
+				}
+			}
+		}
+	}
+
 	window.PAL_Global = _C;
 })();

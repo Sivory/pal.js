@@ -31,21 +31,26 @@
 		var resarray = null;
 		switch (type) {
 			case 'SHORT':
-				resarray = new Int8Array(data.buffer, data.byteOffset + offset, size);
-				break;
-			case 'WORD':
-				resarray = new Uint16Array(data.buffer, data.byteOffset + offset, size);
-				break;
-			case 'DWORD':
-				resarray = new Uint32Array(data.buffer, data.byteOffset + offset, size);
-				break;
 			case 'BYTE':
 			case 'BOOL':
 			case 'USHORT':
-				resarray = new Uint8Array(data.buffer, data.byteOffset + offset, size);
+				resarray = new DataView(data.buffer, data.byteOffset + offset, size);
+				resarray.data = resarray;
+				resarray.size = size;
+				resarray.BYTES_PER_ELEMENT = 1;
+				break;
+			case 'WORD':
+				resarray = new DataView(data.buffer, data.byteOffset + offset, size * 2);
+				resarray.data = resarray;
+				resarray.size = size * 2;
+				resarray.BYTES_PER_ELEMENT = 2;
 				break;
 			case 'INT':
-				resarray = new Int32Array(data.buffer, data.byteOffset + offset, size);
+			case 'DWORD':
+				resarray = new DataView(data.buffer, data.byteOffset + offset, size * 4);
+				resarray.data = resarray;
+				resarray.size = size * 4;
+				resarray.BYTES_PER_ELEMENT = 4;
 				break;
 			case 'POINTER':
 				resarray = [];
@@ -59,12 +64,14 @@
 					var structConstructor = type;
 					var structarray = [];
 					var structoffset = 0;
-					var structsize = structConstructor.prototype.size;
+					var structsize = sizeOf(structConstructor);
 					for (var i = 0; i < size; i++) {
 						var newStructData = new DataView(data.buffer, data.byteOffset + offset + structoffset, structsize);
 						structarray.push(new structConstructor(newStructData));
 						structoffset += structsize;
 					}
+					structarray.data = new DataView(data.buffer, data.byteOffset + offset, structsize * size);
+					structarray.size = structsize * size;
 					resarray = structarray;
 				} else if (type instanceof Array) {
 					//多维数组
@@ -75,10 +82,11 @@
 						arrayarray.push(MAKE_ARRAY(data, offset + arrayoffset, type[0], type[1]));
 						arrayoffset += arraysize;
 					}
+					arrayarray.data = new DataView(data.buffer, data.byteOffset + offset, arraysize * size);
+					arrayarray.size = arraysize * size;
 					resarray = arrayarray;
-				} else {
-					throw "error! unknow type as \"" + type + "\"";
 				}
+				break;
 		}
 		return resarray;
 	}
@@ -104,14 +112,14 @@
 					var type = _ins.typelist[key];
 					var offset = _ins.offsetlist[key];
 					var size = _ins.sizelist[key];
-					(function(key, type, offset, size) {
+					(function addAttributes(key, type, offset, size) {
 						switch (type) {
 							case 'SHORT':
 								_ins.__defineGetter__(key, function() {
 									return _ins.data.getInt8(offset);
 								});
 								_ins.__defineSetter__(key, function(value) {
-									_ins.data.getInt8(offset, value);
+									_ins.data.setInt8(offset, value);
 								});
 								break;
 							case 'WORD':
@@ -119,7 +127,7 @@
 									return _ins.data.getUint16(offset, true);
 								});
 								_ins.__defineSetter__(key, function(value) {
-									_ins.data.getUint16(offset, value, true);
+									_ins.data.setUint16(offset, value, true);
 								});
 								break;
 							case 'DWORD':
@@ -127,7 +135,7 @@
 									return _ins.data.getUint32(offset, true);
 								});
 								_ins.__defineSetter__(key, function(value) {
-									_ins.data.getUint32(offset, value, true);
+									_ins.data.setUint32(offset, value, true);
 								});
 								break;
 							case 'BYTE':
