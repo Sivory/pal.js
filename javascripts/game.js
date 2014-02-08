@@ -14,13 +14,13 @@
 			_ins.initGlobals();
 			_ins.initUI();
 			_ins.writer = new PAL_Writer(_ins);
-			// _ins.TrademarkScreen(function() {
-			// _ins.splashScreen(function() {
-			_ins.ui.openingMenu(function(saveSlot) {
-				_ins.gameMain(saveSlot);
+			_ins.TrademarkScreen(function() {
+				_ins.splashScreen(function() {
+					_ins.ui.openingMenu(function(saveSlot) {
+						_ins.gameMain(saveSlot);
+					});
+				});
 			});
-			// });
-			// });
 		});
 	}
 
