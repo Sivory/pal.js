@@ -19,3 +19,7 @@
 ## 游戏体验
 
 [http://sivory.github.io/pal.js/](http://sivory.github.io/pal.js/)
+
+## 项目终止
+
+由于个人时间原因，本项目暂时终止
